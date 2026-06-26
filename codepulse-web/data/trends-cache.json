@@ -1,0 +1,232 @@
+{
+  "ts": 1782388733113,
+  "trends": [
+    {
+      "id": "T01",
+      "source": "arXiv",
+      "title": "Learning Action Priors for Cross-embodiment Robot Manipulation",
+      "url": "http://arxiv.org/abs/2606.26095v1",
+      "published": "2026-06-24T17:59:56Z",
+      "summary": "Most Vision-Language-Action (VLA) models build on a Vision-Language Model (VLM) backbone by attaching an action module and optimizing the full policy jointly. This design inherits strong visual and linguistic priors from the VLM, but leaves the action module to learn physical motion almost from scratch. As a result, the policy lacks an explicit motion prior, forcing early optimization to simultane…",
+      "signal": "최신 제출 (cs.AI/CL/LG)",
+      "category": "툴/라이브러리"
+    },
+    {
+      "id": "T02",
+      "source": "arXiv",
+      "title": "RevengeBench: Reverse Engineering Code-Space Policies from Behavioral Experiments",
+      "url": "http://arxiv.org/abs/2606.26094v1",
+      "published": "2026-06-24T17:59:46Z",
+      "summary": "For most of scientific history, researchers studying behavior could only infer hidden mechanisms from outward actions: an inverse problem that becomes more tractable when observation is augmented by targeted intervention. We pose a computational analogue: given only behavioral traces of an agent in a game environment, can a learner reconstruct the underlying decision program as executable code, an…",
+      "signal": "최신 제출 (cs.AI/CL/LG)",
+      "category": "기법/연구"
+    },
+    {
+      "id": "T03",
+      "source": "arXiv",
+      "title": "On-Policy Self-Distillation with Sampled Demonstrations Reduces Output Diversity",
+      "url": "http://arxiv.org/abs/2606.26091v1",
+      "published": "2026-06-24T17:59:02Z",
+      "summary": "On-policy self-distillation achieves strong pass@1 accuracy by using a single model as both teacher and student, with the teacher conditioned on a correct demonstration to provide dense token-level feedback. We show that this could come at a hidden cost: rollout diversity decreases and pass@k curves flatten (i.e., generating more rollouts fails to improve accuracy). We trace this to compounding bi…",
+      "signal": "최신 제출 (cs.AI/CL/LG)",
+      "category": "산업/정책"
+    },
+    {
+      "id": "T04",
+      "source": "arXiv",
+      "title": "Real-Time Voice AI Hears but Does Not Listen",
+      "url": "http://arxiv.org/abs/2606.26083v1",
+      "published": "2026-06-24T17:55:38Z",
+      "summary": "Speech conveys information through both words and vocal delivery. We evaluate four leading production realtime voice systems-OpenAI's GPT Realtime 2, Google's Gemini 3.1 Flash Live, and Alibaba's Qwen3.5 Omni Plus and Omni Flash-on tasks where the words and the delivery patterns both convey meaningful information. Across three consequential scenarios, all four systems act on the words rather than …",
+      "signal": "최신 제출 (cs.AI/CL/LG)",
+      "category": "모델 출시"
+    },
+    {
+      "id": "T05",
+      "source": "arXiv",
+      "title": "Neglected Free Lunch from Post-training: Progress Advantage for LLM Agents",
+      "url": "http://arxiv.org/abs/2606.26080v1",
+      "published": "2026-06-24T17:54:08Z",
+      "summary": "Process reward models enable fine-grained, step-level evaluation of LLMs, yet building them for agentic settings remains prohibitively difficult: long-horizon interactions, irreversible actions, and stochastic environment feedback make both human annotation and Monte Carlo estimation infeasible at scale. In this work, we show that reinforcement learning (RL) post-training already provides the ingr…",
+      "signal": "최신 제출 (cs.AI/CL/LG)",
+      "category": "산업/정책"
+    },
+    {
+      "id": "T06",
+      "source": "arXiv",
+      "title": "Same Evidence, Different Answer: Auditing Order Sensitivity in Multimodal Large Language Models",
+      "url": "http://arxiv.org/abs/2606.26079v1",
+      "published": "2026-06-24T17:53:26Z",
+      "summary": "Standard benchmarks for multimodal large language models (MLLMs) score each item on one canonical ordering and miss whether order-irrelevant shuffling changes the answer, a baseline reliability property called for by emerging AI evaluation guidelines. We introduce Facet-Probe, a five-facet audit (option, evidence-chunk, document-rank, image-set, and mixed-modality ordering) of 18 frontier and open…",
+      "signal": "최신 제출 (cs.AI/CL/LG)",
+      "category": "모델 출시"
+    },
+    {
+      "id": "T07",
+      "source": "arXiv",
+      "title": "A cross-process welding penetration status prediction algorithm based on unsupervised domain adaptation in laser and TIG welding",
+      "url": "http://arxiv.org/abs/2606.26078v1",
+      "published": "2026-06-24T17:52:57Z",
+      "summary": "Supervised deep learning has been widely used for weld penetration state classification; however, its performance often degrades significantly under domain shift, such as when transferring models between welding processes with distinct physical mechanisms:for instance, from arc-dominated tungsten inert gas (TIG) welding to keyhole-based laser welding. To overcome this limitation, we propose an uns…",
+      "signal": "최신 제출 (cs.AI/CL/LG)",
+      "category": "기법/연구"
+    },
+    {
+      "id": "T08",
+      "source": "arXiv",
+      "title": "Model Forensics: Investigating Whether Concerning Behavior Reflects Misalignment",
+      "url": "http://arxiv.org/abs/2606.26071v1",
+      "published": "2026-06-24T17:45:47Z",
+      "summary": "A central goal of safety research is determining whether a model is misaligned. Prior work has largely focused on detecting concerning behavior. But behavior alone does not establish misalignment: a concerning action can arise from benign causes such as confusion. This motivates model forensics: investigating whether the action was driven by malign intent. In this paper, we propose a baseline prot…",
+      "signal": "최신 제출 (cs.AI/CL/LG)",
+      "category": "기타"
+    },
+    {
+      "id": "T09",
+      "source": "HackerNews",
+      "title": "GLM-5.2 – How to Run Locally",
+      "url": "https://unsloth.ai/docs/models/glm-5.2",
+      "published": "2026-06-22T21:21:01Z",
+      "summary": "",
+      "signal": "608 points · 295 comments",
+      "category": "기타",
+      "discussion": "https://news.ycombinator.com/item?id=48636377"
+    },
+    {
+      "id": "T10",
+      "source": "HackerNews",
+      "title": "Apertus – Open Foundation Model for Sovereign AI",
+      "url": "https://apertvs.ai/",
+      "published": "2026-06-21T21:29:43Z",
+      "summary": "",
+      "signal": "533 points · 183 comments",
+      "category": "기타",
+      "discussion": "https://news.ycombinator.com/item?id=48622778"
+    },
+    {
+      "id": "T11",
+      "source": "HackerNews",
+      "title": "Mistral OCR 4",
+      "url": "https://mistral.ai/news/ocr-4/",
+      "published": "2026-06-23T14:03:19Z",
+      "summary": "",
+      "signal": "496 points · 134 comments",
+      "category": "모델 출시",
+      "discussion": "https://news.ycombinator.com/item?id=48645152"
+    },
+    {
+      "id": "T12",
+      "source": "HackerNews",
+      "title": "Anthropic says Alibaba illicitly extracted Claude AI model capabilities",
+      "url": "https://www.reuters.com/world/china/anthropic-says-alibaba-illicitly-extracted-claude-ai-model-capabilities-2026-06-24/",
+      "published": "2026-06-24T19:48:01Z",
+      "summary": "",
+      "signal": "482 points · 840 comments",
+      "category": "모델 출시",
+      "discussion": "https://news.ycombinator.com/item?id=48664814"
+    },
+    {
+      "id": "T13",
+      "source": "HackerNews",
+      "title": "RubyLLM: A Ruby framework for all major AI providers",
+      "url": "https://rubyllm.com/",
+      "published": "2026-06-24T14:41:41Z",
+      "summary": "",
+      "signal": "396 points · 68 comments",
+      "category": "툴/라이브러리",
+      "discussion": "https://news.ycombinator.com/item?id=48660711"
+    },
+    {
+      "id": "T14",
+      "source": "HackerNews",
+      "title": "Krea 2: SOTA open-weights 12B image model",
+      "url": "https://www.krea.ai/blog/krea-2-technical-report",
+      "published": "2026-06-23T15:31:21Z",
+      "summary": "",
+      "signal": "388 points · 43 comments",
+      "category": "기법/연구",
+      "discussion": "https://news.ycombinator.com/item?id=48646659"
+    },
+    {
+      "id": "T15",
+      "source": "HackerNews",
+      "title": "45°C cooling design cuts data center water use to near zero",
+      "url": "https://blogs.nvidia.com/blog/liquid-cooling-ai-factories/",
+      "published": "2026-06-24T14:10:11Z",
+      "summary": "",
+      "signal": "361 points · 259 comments",
+      "category": "기타",
+      "discussion": "https://news.ycombinator.com/item?id=48660178"
+    },
+    {
+      "id": "T16",
+      "source": "GitHub",
+      "title": "affaan-m/ECC",
+      "url": "https://github.com/affaan-m/ECC",
+      "published": "2026-01-18T00:51:51Z",
+      "summary": "The agent harness performance optimization system. Skills, instincts, memory, security, and research-first development for Claude Code, Codex, Opencode, Cursor and beyond.",
+      "signal": "★ 221460 · JavaScript",
+      "category": "툴/라이브러리"
+    },
+    {
+      "id": "T17",
+      "source": "GitHub",
+      "title": "NousResearch/hermes-agent",
+      "url": "https://github.com/NousResearch/hermes-agent",
+      "published": "2025-07-22T22:22:28Z",
+      "summary": "The agent that grows with you",
+      "signal": "★ 202677 · Python",
+      "category": "툴/라이브러리"
+    },
+    {
+      "id": "T18",
+      "source": "GitHub",
+      "title": "Significant-Gravitas/AutoGPT",
+      "url": "https://github.com/Significant-Gravitas/AutoGPT",
+      "published": "2023-03-16T09:21:07Z",
+      "summary": "AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so that you can focus on what matters.",
+      "signal": "★ 185156 · Python",
+      "category": "툴/라이브러리"
+    },
+    {
+      "id": "T19",
+      "source": "GitHub",
+      "title": "ollama/ollama",
+      "url": "https://github.com/ollama/ollama",
+      "published": "2023-06-26T19:39:32Z",
+      "summary": "Get up and running with Kimi-K2.6, GLM-5.1, MiniMax, DeepSeek, gpt-oss, Qwen, Gemma and other models.",
+      "signal": "★ 174892 · Go",
+      "category": "툴/라이브러리"
+    },
+    {
+      "id": "T20",
+      "source": "GitHub",
+      "title": "f/prompts.chat",
+      "url": "https://github.com/f/prompts.chat",
+      "published": "2022-12-05T13:54:13Z",
+      "summary": "f.k.a. Awesome ChatGPT Prompts. Share, discover, and collect prompts from the community. Free and open source — self-host for your organization with complete privacy.",
+      "signal": "★ 164334 · HTML",
+      "category": "툴/라이브러리"
+    },
+    {
+      "id": "T21",
+      "source": "GitHub",
+      "title": "huggingface/transformers",
+      "url": "https://github.com/huggingface/transformers",
+      "published": "2018-10-29T13:56:00Z",
+      "summary": "🤗 Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and multimodal models, for both inference and training.",
+      "signal": "★ 161901 · Python",
+      "category": "툴/라이브러리"
+    },
+    {
+      "id": "T22",
+      "source": "GitHub",
+      "title": "langgenius/dify",
+      "url": "https://github.com/langgenius/dify",
+      "published": "2023-04-12T07:40:24Z",
+      "summary": "Production-ready platform for agentic workflow development.",
+      "signal": "★ 146539 · TypeScript",
+      "category": "툴/라이브러리"
+    }
+  ]
+}
