@@ -1,0 +1,142 @@
+# CodePulse API 명세서 (OpenAPI 3.1) — DRAFT
+#
+# STATUS: DRAFT — 이건 초안일 뿐 확정본이 아니다. 담당 개발자가 PR로 채우고 바꾼다.
+#   엔드포인트/요청/응답이 부족하거나 어색하면 망설이지 말고 수정 PR을 올려라.
+#   (브랜치 예: feat/B-impact-endpoint, docs/api-trends-endpoint)
+# OWNER: B트랙(신정안/이강훈). A트랙 엔드포인트는 곽민서가 추가.
+# 이 파일은 "API 계약"이다. 스키마 본체는 contracts/*.schema.json 을 참조(재사용)한다.
+# 엔드포인트가 추가/변경되면 이 파일을 PR로 갱신하고, 프론트(C)·평가(D)에 공유한다.
+#
+# 미리보기: https://editor.swagger.io 에 붙여넣으면 시각화됨.
+
+openapi: 3.1.0
+info:
+  title: CodePulse API
+  version: 0.1.0
+  description: |
+    내 코드베이스를 아는 AI 트렌드 레이더.
+    - B. Impact Engine: repo + trend → Impact Card
+    - A. Data Pipeline: (TODO) 수집된 트렌드 제공 엔드포인트
+
+servers:
+  - url: http://localhost:8000
+    description: 로컬 개발 서버 (FastAPI)
+
+paths:
+  /api/impact:
+    post:
+      summary: 트렌드 1건이 repo에 미치는 영향 분석 → Impact Card
+      operationId: analyzeImpact
+      description: |
+        Rule Gate로 무관한 항목을 거른 뒤, 통과한 것만 Gemini로 분석한다.
+        gate fail이면 LLM 호출 없이 display_decision="hide" 카드를 반환한다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImpactRequest"
+            example:
+              repo:
+                repo_name: pdf-rag-assistant
+                repo_url: https://github.com/user/pdf-rag-assistant
+                readme: PDF 문서를 업로드하면 RAG 기반으로 질문에 답하는 프로젝트입니다.
+                dependencies: [faiss-cpu, langchain, openai]
+                file_tree: [rag/retriever.py, rag/generator.py, requirements.txt]
+                code_context: retriever.py에서 FAISS 기반 top-k 검색을 수행
+                meta_tags: [RAG, LLM, PDF]
+              trend:
+                id: arxiv_2406.12345
+                source: arxiv
+                title: New reranking method improves RAG retrieval quality
+                summary: RAG 검색 결과를 reranker로 재정렬해 품질을 높이는 방법
+                url: https://arxiv.org/abs/2406.12345
+                type: paper
+                keyword_tags: [RAG, reranking, retrieval]
+      responses:
+        "200":
+          description: 분석 결과 Impact Card
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImpactCard"
+        "422":
+          description: 입력 검증 실패 (Pydantic)
+
+  # TODO(A트랙/곽민서): 수집된 트렌드를 프론트/엔진에 제공하는 엔드포인트 설계.
+  # 예시(초안) — 합의 후 확정:
+  # /api/trends:
+  #   get:
+  #     summary: 최신 수집 트렌드 목록 (Chroma/캐시에서)
+  #     parameters:
+  #       - { name: source, in: query, schema: { type: string, enum: [arxiv, hackernews, github] } }
+  #       - { name: limit,  in: query, schema: { type: integer, default: 50 } }
+  #     responses:
+  #       "200":
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: array
+  #               items: { $ref: "#/components/schemas/Trend" }
+
+components:
+  schemas:
+    # 아래 스키마들은 contracts/*.schema.json 과 1:1로 일치해야 한다.
+    # (지금은 요약본. 단일 진실 소스는 contracts/ 폴더이며, 변경 시 양쪽을 같은 PR로 맞춘다.)
+    Trend:
+      type: object
+      description: contracts/trend.schema.json 참조
+      required: [id, source, title, summary, url, type]
+      properties:
+        id: { type: string }
+        source: { type: string, enum: [arxiv, hackernews, github] }
+        title: { type: string }
+        summary: { type: string }
+        url: { type: string, format: uri }
+        published_at: { type: string }
+        type: { type: string, enum: [paper, tool, repo, news, benchmark] }
+        task_tags: { type: array, items: { type: string } }
+        dependency_tags: { type: array, items: { type: string } }
+        impact_tags: { type: array, items: { type: string } }
+        keyword_tags: { type: array, items: { type: string } }
+
+    RepoContext:
+      type: object
+      description: contracts/repo_context.schema.json 참조
+      required: [repo_name, repo_url]
+      properties:
+        repo_name: { type: string }
+        repo_url: { type: string, format: uri }
+        readme: { type: [string, "null"] }
+        dependencies: { type: array, items: { type: string } }
+        file_tree: { type: array, items: { type: string } }
+        code_context: { type: [string, "null"] }
+        meta_tags: { type: array, items: { type: string } }
+
+    ImpactRequest:
+      type: object
+      required: [repo, trend]
+      properties:
+        repo: { $ref: "#/components/schemas/RepoContext" }
+        trend: { $ref: "#/components/schemas/Trend" }
+
+    ImpactCard:
+      type: object
+      description: contracts/impact_card.schema.json 참조
+      required:
+        [trend_id, classification, classification_label, relevance_score,
+         display_decision, evidence, why_it_matters, next_actions, related_files]
+      properties:
+        trend_id: { type: string }
+        classification:
+          type: string
+          enum: [impact, replacement_candidate, new_application, exclude]
+        classification_label:
+          type: string
+          enum: [영향, 대체후보, 신규적용, 제외]
+        relevance_score: { type: integer, minimum: 0, maximum: 100 }
+        display_decision: { type: string, enum: [show, candidate, hide] }
+        evidence: { type: array, items: { type: string } }
+        why_it_matters: { type: string }
+        next_actions: { type: array, items: { type: string } }
+        related_files: { type: array, items: { type: string } }

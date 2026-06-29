@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/khuda-data/9th-NLP-team4/contracts/repo_context.schema.json",
+  "$comment": "STATUS: DRAFT | OWNER: 이수련(C) ↔ 신정안/이강훈(B) | 출처: docs/수정2) FastAPI 버전 §6-1. 온보딩/패커가 생산, 엔진이 소비.",
+  "title": "RepoContext",
+  "description": "사용자 GitHub repo를 분석해 만든 컨텍스트. C(온보딩/패커)가 생산하고 B(엔진)가 입력으로 받는다.",
+  "type": "object",
+  "version": "0.1.0",
+  "required": ["repo_name", "repo_url"],
+  "additionalProperties": false,
+  "properties": {
+    "repo_name": { "type": "string", "description": "레포 이름" },
+    "repo_url": { "type": "string", "format": "uri", "description": "레포 URL" },
+    "readme": {
+      "type": ["string", "null"],
+      "description": "README 본문 또는 요약"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "requirements.txt / package.json 등에서 추출한 의존성"
+    },
+    "file_tree": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "주요 파일 경로 목록. 예: rag/retriever.py"
+    },
+    "code_context": {
+      "type": ["string", "null"],
+      "description": "핵심 코드 일부 또는 요약된 코드 컨텍스트"
+    },
+    "meta_tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "repo 도메인/스택 추론 태그. 예: RAG, LLM, FastAPI"
+    }
+  }
+}

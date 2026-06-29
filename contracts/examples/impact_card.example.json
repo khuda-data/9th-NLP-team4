@@ -1,0 +1,19 @@
+{
+  "trend_id": "arxiv_2406.12345",
+  "classification": "replacement_candidate",
+  "classification_label": "대체후보",
+  "relevance_score": 82,
+  "display_decision": "show",
+  "evidence": [
+    "README에 RAG 기반 PDF QA 프로젝트라고 설명되어 있음",
+    "dependencies에 faiss-cpu가 포함되어 있음",
+    "file_tree에 rag/retriever.py가 존재함"
+  ],
+  "why_it_matters": "현재 repo는 FAISS 기반 검색 구조를 사용하는 것으로 보이며, reranking 기법은 검색 품질을 개선할 수 있는 대체후보가 될 수 있다.",
+  "next_actions": [
+    "rag/retriever.py에서 top-k 검색 결과를 반환하는 부분을 확인한다.",
+    "검색 결과 이후 reranker를 적용하는 post-processing 단계를 추가한다.",
+    "기존 FAISS-only 방식과 reranker 적용 방식의 검색 품질을 비교한다."
+  ],
+  "related_files": ["rag/retriever.py", "requirements.txt", "README.md"]
+}

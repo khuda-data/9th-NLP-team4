@@ -1,0 +1,15 @@
+{
+  "repo_name": "pdf-rag-assistant",
+  "repo_url": "https://github.com/user/pdf-rag-assistant",
+  "readme": "PDF 문서를 업로드하면 RAG 기반으로 질문에 답하는 프로젝트입니다.",
+  "dependencies": ["faiss-cpu", "langchain", "openai", "fastapi", "pypdf"],
+  "file_tree": [
+    "rag/retriever.py",
+    "rag/generator.py",
+    "rag/loader.py",
+    "requirements.txt",
+    "README.md"
+  ],
+  "code_context": "retriever.py에서 FAISS 기반 top-k 검색을 수행하는 코드 일부",
+  "meta_tags": ["RAG", "LLM", "PDF", "FastAPI"]
+}
