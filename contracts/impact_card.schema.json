@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/khuda-data/9th-NLP-team4/contracts/impact_card.schema.json",
+  "$comment": "STATUS: DRAFT | OWNER: 신정안/이강훈(B) ↔ 이수련(C) | 출처: docs/수정2) FastAPI 버전 §7, §8. 엔진이 생산, 프론트가 소비.",
+  "title": "ImpactCard",
+  "description": "B(엔진)의 최종 출력. 프론트 피드에서 그대로 렌더링하는 카드. trend×repo 한 쌍당 하나.",
+  "type": "object",
+  "version": "0.1.0",
+  "required": [
+    "trend_id",
+    "classification",
+    "classification_label",
+    "relevance_score",
+    "display_decision",
+    "evidence",
+    "why_it_matters",
+    "next_actions",
+    "related_files"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "trend_id": {
+      "type": "string",
+      "description": "어떤 트렌드에 대한 카드인지. Trend.id 와 일치해야 함."
+    },
+    "classification": {
+      "type": "string",
+      "enum": ["impact", "replacement_candidate", "new_application", "exclude"],
+      "description": "분류 (영문 키)"
+    },
+    "classification_label": {
+      "type": "string",
+      "enum": ["영향", "대체후보", "신규적용", "제외"],
+      "description": "분류 (한국어 표시용). classification과 1:1 대응."
+    },
+    "relevance_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "이 repo 기준 관련도. LLM rubric 기반 단일 점수."
+    },
+    "display_decision": {
+      "type": "string",
+      "enum": ["show", "candidate", "hide"],
+      "description": "노출 결정. show=피드 노출, candidate=후보 보관, hide=숨김."
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "repo 근거 문장 목록. 비어 있으면 hide 처리."
+    },
+    "why_it_matters": {
+      "type": "string",
+      "description": "왜 이 repo에 의미 있는지 설명"
+    },
+    "next_actions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "구체적 다음 행동 목록. 파일/함수 단위로 구체적일수록 좋음."
+    },
+    "related_files": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "근거가 된 repo 파일 경로"
+    }
+  }
+}
