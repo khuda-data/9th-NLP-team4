@@ -7,7 +7,7 @@ import type { Trend } from "./types";
 
 const N_ARXIV = 8, N_HN = 7, N_GH = 7;
 const UA = "khuda-codepulse";
-const CACHE_PATH = path.join(process.cwd(), "data", "trends-cache.json");
+const CACHE_PATH = path.join(process.cwd(), "demo", "trends-cache.json");
 const CACHE_MAX_AGE_MS = 6 * 60 * 60 * 1000; // 6시간
 
 const clean = (s?: string) => (s || "").replace(/\s+/g, " ").trim();
