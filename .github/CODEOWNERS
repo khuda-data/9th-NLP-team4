@@ -1,18 +1,19 @@
 # CODEOWNERS — PR이 올라오면 자동으로 리뷰어가 지정된다.
 # 형식: <경로>  <@github-아이디 …>
 #
-# 현재는 총괄(이강훈, @lkh3409)이 전체 리뷰어. 팀원 GitHub 아이디를 알면
-# 아래 TODO를 각 트랙 담당자로 채우면 트랙별로 리뷰가 분배된다.
+# 확정 매핑: 이강훈=@lkh3409(총괄), 신정안=@SJA-03, 곽민서=@rhkralstj
+# 미확정(리포에 KHUDA 전체가 섞여 있어 식별 불가): 이수련(C), 양경식
+#   → GitHub 아이디 확인되면 아래 TODO 줄의 주석을 풀고 채우면 됨.
 
-# 기본: 모든 변경은 총괄이 리뷰
+# 기본: 모든 변경은 총괄(이강훈)이 리뷰
 *                       @lkh3409
 
 # 계약(스키마/API)은 변경 영향이 크므로 항상 총괄이 본다
 /contracts/             @lkh3409
 /api/                   @lkh3409
 
-# 트랙별 담당 (TODO: 실제 GitHub 아이디로 교체)
-# /backend/             @신정안아이디 @lkh3409       # B. Impact Engine
-# /data_pipeline/       @곽민서아이디 @lkh3409       # A. 데이터 파이프라인
-# /codepulse-web/       @이수련아이디 @lkh3409       # C. 프론트엔드
-# /eval/                @lkh3409                     # D. 평가
+# 트랙별 담당
+/data_pipeline/         @rhkralstj @lkh3409     # A. 데이터 파이프라인 (곽민서)
+/backend/               @SJA-03 @lkh3409        # B. Impact Engine (신정안)
+/eval/                  @lkh3409                # D. 평가 (이강훈)
+# /codepulse-web/       @이수련아이디 @lkh3409   # C. 프론트엔드 (TODO: 이수련 GitHub 아이디)
