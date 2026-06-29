@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import Feed from "@/components/Feed";
 import type { AnalyzeResult } from "@/lib/types";
-import demoMatches from "@/data/matches.json";
-import demoMeta from "@/data/feed-meta.json";
+import demoMatches from "@/demo/matches.json";
+import demoMeta from "@/demo/feed-meta.json";
 
 const STAGES = ["레포 클론", "코드 패킹", "트렌드 수집", "Gemini 매칭"];
 const EXAMPLES = ["lkh3409/Gram", "AsyncFuncAI/deepwiki-open", "openai/openai-python"];
