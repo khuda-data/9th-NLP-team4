@@ -12,7 +12,7 @@ Collector
 -> Normalizer
 -> Rule-based Weak Labeling
 -> Semantic Deduplication
--> Chroma Ingestion 또는 JSONL fallback
+-> JSON 저장
 -> Quality Check
 -> Deterministic Repair
 ```
@@ -41,18 +41,40 @@ python3 -m data_pipeline.run --sample --langgraph
 
 - `data_pipeline/output/trends.json`
   - `contracts/trend.schema.json`을 따르는 표준 Trend JSON 배열
-- `data_pipeline/output/chroma/`
-  - `chromadb`가 설치되어 있으면 Chroma persistent DB로 저장
 - `data_pipeline/output/chroma/trends.jsonl`
-  - `chromadb`가 없을 때 사용하는 JSONL fallback 저장소
+  - 현재 MVP에서 사용하는 보조 JSONL 저장소
+  - ChromaDB가 아직 준비되지 않은 환경에서도 수집 결과를 확인하기 위한 fallback입니다.
+
+## ChromaDB 고려 사항
+
+MVP에서는 수집 데이터가 많지 않기 때문에 `trends.json` 기반 전달을 기본으로 둡니다.
+
+ChromaDB는 다음 조건이 필요해질 때 도입을 고려합니다.
+
+```text
+트렌드 데이터가 수백~수천 건으로 누적됨
+repo와 의미적으로 가까운 trend top-k 검색이 필요함
+B트랙에서 embedding similarity 기반 후보 검색을 사용하기로 확정됨
+매일 수집한 트렌드를 누적 저장하고 검색해야 함
+```
+
+현재 코드는 ChromaDB가 없어도 동작하도록 JSONL fallback을 제공합니다.
+실제 Chroma vector 저장/검색은 별도 PR에서 다음 항목을 함께 결정한 뒤 구현하는 것이 안전합니다.
+
+```text
+chromadb dependency 추가
+local embedding model 선택
+embedding_text -> vector 변환
+collection metadata/filter 설계
+search_trends(query, top_k) API 추가
+```
 
 ## B트랙 전달 기준
 
-B트랙은 A트랙 산출물을 다음 둘 중 하나로 읽으면 됩니다.
+B트랙은 MVP 단계에서 A트랙 산출물을 기본적으로 다음 파일에서 읽으면 됩니다.
 
 ```text
-1. data_pipeline/output/trends.json
-2. Chroma collection: codepulse_trends
+data_pipeline/output/trends.json
 ```
 
 Trend 객체의 기준은 항상 `contracts/trend.schema.json`입니다.
