@@ -34,7 +34,7 @@ const trends = JSON.parse(fs.readFileSync(trendsPath, "utf8"));
 
 // 트렌드를 프롬프트용으로 압축
 const trendsBlock = trends.map((t) =>
-  `- ${t.id} [${t.source}] ${t.title}\n  url: ${t.url}\n  신호: ${t.signal}${t.summary ? `\n  요약: ${t.summary}` : ""}`
+  `- ${t.trend_id} [${t.source}/${t.type}] ${t.title}\n  url: ${t.url}\n  tags: ${[...(t.task_tags || []), ...(t.dependency_tags || []), ...(t.impact_tags || []), ...(t.keyword_tags || [])].join(", ") || "none"}\n  요약: ${t.summary || ""}`
 ).join("\n");
 
 const PROMPT = `당신은 "CodePulse"의 매칭·영향 엔진입니다. 사용자의 코드베이스를 깊이 이해한 시니어 개발자로서, 오늘 수집된 AI 트렌드 중 "이 프로젝트에 실제로 의미 있는 것"만 골라 영향을 분석합니다.

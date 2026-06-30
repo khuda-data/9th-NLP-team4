@@ -1,11 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/khuda-data/9th-NLP-team4/contracts/trend.schema.json",
-  "$comment": "STATUS: DRAFT | OWNER: 곽민서(A) | 출처: docs/데이터·수집 파이프라인 - 곽민서 §5.2. B/C 트랙 검토 후 AGREED로 변경.",
+  "$comment": "STATUS: AGREED | OWNER: 곽민서(A) | A트랙이 생산하고 B/C트랙이 소비하는 Trend JSON 계약.",
   "title": "Trend",
   "description": "A(수집 파이프라인)가 생산하여 B(엔진)·C(피드)가 소비하는 공통 트렌드 항목. 한 소스(arXiv/HN/GitHub)의 데이터를 이 공통 형태로 정규화한 결과.",
   "type": "object",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "required": ["trend_id", "source", "title", "summary", "url", "type"],
   "additionalProperties": false,
   "properties": {

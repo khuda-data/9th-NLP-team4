@@ -21,7 +21,7 @@
   "properties": {
     "trend_id": {
       "type": "string",
-      "description": "어떤 트렌드에 대한 카드인지. Trend.id 와 일치해야 함."
+      "description": "어떤 트렌드에 대한 카드인지. Trend.trend_id 와 일치해야 함."
     },
     "classification": {
       "type": "string",
