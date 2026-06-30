@@ -1,5 +1,5 @@
 {
-  "id": "arxiv_2406.12345",
+  "trend_id": "arxiv_2406.12345",
   "source": "arxiv",
   "title": "New reranking method improves RAG retrieval quality",
   "summary": "RAG 시스템에서 초기 검색 결과를 reranker로 재정렬해 답변 품질을 높이는 방법을 제안한다.",
@@ -13,9 +13,11 @@
   "keyword_tags": ["retrieval", "reranker", "late interaction"],
   "embedding_text": "New reranking method improves RAG retrieval quality. reranker reorders top-k results.",
   "metadata": {
-    "score": 0,
+    "source_score": null,
     "comments": 0,
     "stars": 0,
-    "language": ""
+    "forks": null,
+    "language": null,
+    "categories": ["cs.CL"]
   }
 }
