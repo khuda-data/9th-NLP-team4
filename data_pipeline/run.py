@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 
-from .graph import run_sequential
+from .graph import run_langgraph, run_sequential
 
 
 SAMPLE_RAW = [
@@ -32,12 +32,14 @@ SAMPLE_RAW = [
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run CodePulse A-track data pipeline")
     parser.add_argument("--sample", action="store_true", help="Use built-in sample rows instead of external APIs")
+    parser.add_argument("--langgraph", action="store_true", help="Run through the LangGraph StateGraph workflow")
     parser.add_argument("--output-dir", default="data_pipeline/output")
     parser.add_argument("--limit-per-source", type=int, default=20)
     args = parser.parse_args()
 
     raw = SAMPLE_RAW if args.sample else None
-    state = run_sequential(raw_trends=raw, output_dir=args.output_dir, limit_per_source=args.limit_per_source)
+    runner = run_langgraph if args.langgraph else run_sequential
+    state = runner(raw_trends=raw, output_dir=args.output_dir, limit_per_source=args.limit_per_source)
     print(json.dumps(state.quality_report, ensure_ascii=False, indent=2))
     if state.errors:
         print(json.dumps({"errors": state.errors}, ensure_ascii=False, indent=2))
@@ -45,4 +47,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -31,6 +31,12 @@ python3 -m data_pipeline.run --sample
 python3 -m data_pipeline.run --limit-per-source 20
 ```
 
+LangGraph workflow로 실행:
+
+```bash
+python3 -m data_pipeline.run --sample --langgraph
+```
+
 ## 산출물
 
 - `data_pipeline/output/trends.json`
@@ -72,10 +78,10 @@ metadata
 
 ## LangGraph 사용 방식
 
-`graph.py`에는 `build_langgraph()`가 준비되어 있습니다.
+`graph.py`에는 실제 LangGraph workflow가 구현되어 있습니다.
 
-다만 MVP는 `langgraph` 설치 없이도 `run_sequential()`로 실행됩니다. 같은 node 함수를 사용하므로,
-추후 `langgraph`를 설치하면 순차 실행을 상태 기반 workflow로 자연스럽게 옮길 수 있습니다.
+기본 MVP는 `langgraph` 설치 없이도 `run_sequential()`로 실행됩니다. `langgraph`를 설치한 환경에서는
+`run_langgraph()` 또는 CLI의 `--langgraph` 옵션으로 같은 node들을 `StateGraph`로 실행할 수 있습니다.
 
 LangGraph는 LLM agent 호출용이 아니라, 다음과 같은 조건부 제어를 위한 workflow 엔진으로 사용합니다.
 
@@ -84,4 +90,10 @@ LangGraph는 LLM agent 호출용이 아니라, 다음과 같은 조건부 제어
 task_tags 누락률 높음 -> rule 보정
 적재 개수 부족 -> query expansion 후 재수집
 중복률 높음 -> dedup threshold 조정
+```
+
+필요 패키지:
+
+```bash
+pip install -r data_pipeline/requirements.txt
 ```

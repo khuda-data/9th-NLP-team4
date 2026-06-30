@@ -95,23 +95,38 @@ def run_sequential(
     return state
 
 
-def build_langgraph():
-    """Build a LangGraph workflow when langgraph is installed.
+def run_langgraph(
+    raw_trends: list[dict] | None = None,
+    output_dir: str | Path = "data_pipeline/output",
+    limit_per_source: int = 20,
+) -> PipelineState:
+    app = build_langgraph(output_dir=output_dir, limit_per_source=limit_per_source)
+    result = app.invoke({"raw_trends": raw_trends or []})
+    return PipelineState(**result)
 
-    The project does not require LangGraph for tests or local MVP execution.
-    Install it later and this function can be used by the backend scheduler.
-    """
+
+def build_langgraph(
+    output_dir: str | Path = "data_pipeline/output",
+    limit_per_source: int = 20,
+):
+    """Build the LangGraph workflow used by the A-track pipeline."""
     try:
         from langgraph.graph import END, StateGraph  # type: ignore
     except Exception as exc:
         raise RuntimeError("langgraph is not installed; use run_sequential() for the no-dependency MVP") from exc
 
+    def collect_with_config(state: PipelineState) -> PipelineState:
+        return collector_node(state, limit_per_source=limit_per_source)
+
+    def ingest_with_config(state: PipelineState) -> PipelineState:
+        return ingestion_node(state, output_dir=output_dir)
+
     graph = StateGraph(PipelineState)
-    graph.add_node("collector", collector_node)
+    graph.add_node("collector", collect_with_config)
     graph.add_node("normalizer", normalizer_node)
     graph.add_node("weak_labeling", weak_labeling_node)
     graph.add_node("semantic_dedup", semantic_dedup_node)
-    graph.add_node("ingestion", ingestion_node)
+    graph.add_node("ingestion", ingest_with_config)
     graph.add_node("quality_check", quality_check_node)
     graph.add_node("repair", repair_node)
     graph.set_entry_point("collector")
