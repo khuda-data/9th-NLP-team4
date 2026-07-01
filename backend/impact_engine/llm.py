@@ -9,7 +9,8 @@ GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"
     "gemini-2.5-flash:generateContent"
 )
-TRANSIENT_STATUS_CODES = {502, 503, 504}
+OPENAI_URL = "https://api.openai.com/v1/chat/completions"
+TRANSIENT_STATUS_CODES = {429, 502, 503, 504}
 
 
 def _env_flag(name: str, default: bool = False) -> bool:
@@ -94,6 +95,54 @@ async def call_llm(prompt: str, api_key: str | None = None) -> str:
     if _env_flag("USE_FAKE_LLM", default=True):
         return _fake_response(prompt)
 
+    provider = (os.getenv("LLM_PROVIDER") or "gemini").strip().lower()
+    if provider == "openai":
+        return await _call_openai(prompt, api_key)
+    return await _call_gemini(prompt, api_key)
+
+
+async def _call_openai(prompt: str, api_key: str | None = None) -> str:
+    openai_api_key = api_key.strip() if api_key else os.getenv("OPENAI_API_KEY")
+    if not openai_api_key:
+        raise RuntimeError(
+            "OPENAI_API_KEY is required when LLM_PROVIDER=openai and USE_FAKE_LLM is false"
+        )
+
+    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.2,
+        "response_format": {"type": "json_object"},
+    }
+    headers = {"Authorization": f"Bearer {openai_api_key}"}
+
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        for attempt in range(2):
+            try:
+                response = await client.post(OPENAI_URL, json=payload, headers=headers)
+                response.raise_for_status()
+                data = response.json()
+                break
+            except httpx.HTTPStatusError as exc:
+                if attempt == 0 and exc.response.status_code in TRANSIENT_STATUS_CODES:
+                    continue
+                raise
+        else:
+            raise RuntimeError("OpenAI request did not complete")
+
+    try:
+        generated_text = data["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, TypeError) as exc:
+        raise RuntimeError("OpenAI response did not contain generated text") from exc
+
+    if not isinstance(generated_text, str) or not generated_text.strip():
+        raise RuntimeError("OpenAI response text was empty")
+
+    return generated_text
+
+
+async def _call_gemini(prompt: str, api_key: str | None = None) -> str:
     gemini_api_key = api_key.strip() if api_key else os.getenv("GEMINI_API_KEY")
     if not gemini_api_key:
         raise RuntimeError("GEMINI_API_KEY is required when USE_FAKE_LLM is false")
