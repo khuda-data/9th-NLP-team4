@@ -1,4 +1,5 @@
 import json
+import os
 from collections.abc import AsyncIterator
 
 from fastapi import FastAPI, Request
@@ -46,6 +47,13 @@ def _sse_event(event: str, data: dict) -> str:
     return f"event: {event}\ndata: {payload}\n\n"
 
 
+def _env_flag(name: str, default: bool = False) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(
     request: Request,
@@ -57,8 +65,8 @@ async def validation_exception_handler(
 
 
 @app.get("/health")
-async def health() -> dict[str, str]:
-    return {"status": "ok"}
+async def health() -> dict[str, str | bool]:
+    return {"status": "ok", "use_fake_llm": _env_flag("USE_FAKE_LLM", default=True)}
 
 
 @app.post("/api/impact", response_model=ImpactCard)
