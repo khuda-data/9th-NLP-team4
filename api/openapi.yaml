@@ -46,7 +46,7 @@ paths:
                 code_context: retriever.py에서 FAISS 기반 top-k 검색을 수행
                 meta_tags: [RAG, LLM, PDF]
               trend:
-                id: arxiv_2406.12345
+                trend_id: arxiv_2406.12345
                 source: arxiv
                 title: New reranking method improves RAG retrieval quality
                 summary: RAG 검색 결과를 reranker로 재정렬해 품질을 높이는 방법
@@ -63,21 +63,42 @@ paths:
         "422":
           description: 입력 검증 실패 (Pydantic)
 
-  # TODO(A트랙/곽민서): 수집된 트렌드를 프론트/엔진에 제공하는 엔드포인트 설계.
-  # 예시(초안) — 합의 후 확정:
-  # /api/trends:
-  #   get:
-  #     summary: 최신 수집 트렌드 목록 (Chroma/캐시에서)
-  #     parameters:
-  #       - { name: source, in: query, schema: { type: string, enum: [arxiv, hackernews, github] } }
-  #       - { name: limit,  in: query, schema: { type: integer, default: 50 } }
-  #     responses:
-  #       "200":
-  #         content:
-  #           application/json:
-  #             schema:
-  #               type: array
-  #               items: { $ref: "#/components/schemas/Trend" }
+  /api/trends:
+    get:
+      summary: 최신 수집 트렌드 목록
+      operationId: listTrends
+      description: |
+        A트랙 데이터 파이프라인이 수집·정규화·태깅·중복제거 후 저장한 Trend JSON 목록을 반환한다.
+        응답 항목은 contracts/trend.schema.json과 1:1로 일치해야 한다.
+      parameters:
+        - name: source
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [arxiv, hackernews, github]
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [paper, tool, repo, news, benchmark]
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 200
+      responses:
+        "200":
+          description: Trend JSON 배열
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Trend" }
 
 components:
   schemas:
@@ -86,19 +107,31 @@ components:
     Trend:
       type: object
       description: contracts/trend.schema.json 참조
-      required: [id, source, title, summary, url, type]
+      required: [trend_id, source, title, summary, url, type]
       properties:
-        id: { type: string }
+        trend_id: { type: string }
         source: { type: string, enum: [arxiv, hackernews, github] }
         title: { type: string }
         summary: { type: string }
         url: { type: string, format: uri }
         published_at: { type: string }
+        authors_or_org: { type: array, items: { type: string } }
         type: { type: string, enum: [paper, tool, repo, news, benchmark] }
         task_tags: { type: array, items: { type: string } }
         dependency_tags: { type: array, items: { type: string } }
         impact_tags: { type: array, items: { type: string } }
         keyword_tags: { type: array, items: { type: string } }
+        raw_text: { type: string }
+        embedding_text: { type: string }
+        metadata:
+          type: object
+          properties:
+            source_score: { type: [number, "null"] }
+            stars: { type: [integer, "null"] }
+            forks: { type: [integer, "null"] }
+            comments: { type: [integer, "null"] }
+            language: { type: [string, "null"] }
+            categories: { type: array, items: { type: string } }
 
     RepoContext:
       type: object

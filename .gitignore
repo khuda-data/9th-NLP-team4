@@ -7,8 +7,16 @@ api_key.txt
 # 실험용으로 따온 외부 repo들
 spike/
 
+# A트랙 파이프라인 실행 산출물
+data_pipeline/output/
+
 # 의존성
 node_modules/
+.venv/
+
+# Python 생성물
+__pycache__/
+*.py[cod]
 
 # Next.js 빌드 산출물
 .next/
