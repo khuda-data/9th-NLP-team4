@@ -30,3 +30,8 @@ Thumbs.db
 
 # Office 임시 잠금 파일
 ~$*
+
+codepulse-web/.understand-anything
+codepulse-web/dist
+codepulse-web/chats
+codepulse-web/project
