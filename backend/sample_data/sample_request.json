@@ -1,0 +1,133 @@
+{
+  "repo": {
+    "repo_name": "pdf-rag-assistant",
+    "repo_url": "https://github.com/user/pdf-rag-assistant",
+    "readme": "PDF RAG project using FAISS and LangChain for document question answering.",
+    "dependencies": ["faiss-cpu", "langchain", "openai"],
+    "file_tree": [
+      "rag/retriever.py",
+      "rag/generator.py",
+      "rag/prompts.py",
+      "requirements.txt"
+    ],
+    "code_context": "retriever.py performs FAISS top-k search before generator.py calls the LLM.",
+    "meta_tags": ["RAG", "LLM", "PDF"]
+  },
+  "trends": [
+    {
+      "trend_id": "arxiv_2406.12345",
+      "source": "arxiv",
+      "title": "New reranking method improves RAG retrieval quality",
+      "summary": "RAG 시스템에서 초기 검색 결과를 reranker로 재정렬해 답변 품질을 높이는 방법을 제안한다.",
+      "url": "https://arxiv.org/abs/2406.12345",
+      "published_at": "2026-06-28",
+      "authors_or_org": ["Jane Doe", "John Smith"],
+      "type": "paper",
+      "task_tags": ["RAG", "Evaluation"],
+      "dependency_tags": [],
+      "impact_tags": ["accuracy"],
+      "keyword_tags": ["retrieval", "reranker", "late interaction"],
+      "embedding_text": "New reranking method improves RAG retrieval quality. RAG 시스템에서 초기 검색 결과를 reranker로 재정렬해 답변 품질을 높이는 방법을 제안한다. Tags: RAG, Evaluation, retrieval, reranker, late interaction.",
+      "metadata": {
+        "source_score": null,
+        "stars": null,
+        "forks": null,
+        "comments": null,
+        "language": null,
+        "categories": ["cs.CL", "cs.AI"]
+      }
+    },
+    {
+      "trend_id": "github_langchain_retriever_20260627",
+      "source": "github",
+      "title": "LangChain releases improved retriever interface",
+      "summary": "LangChain이 RAG 앱의 retriever 설정과 마이그레이션 경로를 개선한 업데이트를 공개했다.",
+      "url": "https://github.com/langchain-ai/langchain/releases",
+      "published_at": "2026-06-27",
+      "authors_or_org": ["langchain-ai"],
+      "type": "repo",
+      "task_tags": ["RAG"],
+      "dependency_tags": ["LangChain"],
+      "impact_tags": ["maintenance", "compatibility"],
+      "keyword_tags": ["retriever", "chain", "migration"],
+      "embedding_text": "LangChain releases improved retriever interface. LangChain이 RAG 앱의 retriever 설정과 마이그레이션 경로를 개선한 업데이트를 공개했다. Tags: RAG, LangChain, retriever, chain, migration.",
+      "metadata": {
+        "source_score": null,
+        "stars": 98000,
+        "forks": 16000,
+        "comments": null,
+        "language": "Python",
+        "categories": []
+      }
+    },
+    {
+      "trend_id": "github_rag_eval_tool_20260626",
+      "source": "github",
+      "title": "Open-source RAG evaluation tool adds retrieval metrics",
+      "summary": "RAG 시스템의 retrieval recall과 answer faithfulness를 측정하는 경량 평가 도구가 공개되었다.",
+      "url": "https://github.com/example/rag-evaluation-tool",
+      "published_at": "2026-06-26",
+      "authors_or_org": ["RAG Eval Lab"],
+      "type": "tool",
+      "task_tags": ["RAG", "Evaluation"],
+      "dependency_tags": [],
+      "impact_tags": ["quality"],
+      "keyword_tags": ["evaluation", "retrieval", "metrics", "faithfulness"],
+      "embedding_text": "Open-source RAG evaluation tool adds retrieval metrics. RAG 시스템의 retrieval recall과 answer faithfulness를 측정하는 경량 평가 도구가 공개되었다. Tags: RAG, Evaluation, retrieval, metrics, faithfulness.",
+      "metadata": {
+        "source_score": null,
+        "stars": 4200,
+        "forks": 310,
+        "comments": null,
+        "language": "Python",
+        "categories": []
+      }
+    },
+    {
+      "trend_id": "hn_image_model_20260625",
+      "source": "hackernews",
+      "title": "New image generation model improves character consistency",
+      "summary": "새 이미지 생성 모델이 이미지 편집과 캐릭터 디자인에서 프롬프트 준수율을 높였다는 소식이다.",
+      "url": "https://news.ycombinator.com/item?id=46000001",
+      "published_at": "2026-06-25",
+      "authors_or_org": [],
+      "type": "tool",
+      "task_tags": ["Image Generation"],
+      "dependency_tags": [],
+      "impact_tags": ["quality"],
+      "keyword_tags": ["image", "diffusion", "character consistency"],
+      "embedding_text": "New image generation model improves character consistency. 새 이미지 생성 모델이 이미지 편집과 캐릭터 디자인에서 프롬프트 준수율을 높였다는 소식이다. Tags: Image Generation, image, diffusion, character consistency.",
+      "metadata": {
+        "source_score": 327,
+        "stars": null,
+        "forks": null,
+        "comments": 84,
+        "language": null,
+        "categories": []
+      }
+    },
+    {
+      "trend_id": "hn_ai_market_20260624",
+      "source": "hackernews",
+      "title": "AI market revenue grows after enterprise adoption",
+      "summary": "기업 도입 증가로 AI 시장 매출과 투자 규모가 계속 커지고 있다는 산업 뉴스다.",
+      "url": "https://news.ycombinator.com/item?id=45999999",
+      "published_at": "2026-06-24",
+      "authors_or_org": [],
+      "type": "news",
+      "task_tags": ["AI"],
+      "dependency_tags": [],
+      "impact_tags": ["market"],
+      "keyword_tags": ["market", "enterprise", "revenue", "adoption"],
+      "embedding_text": "AI market revenue grows after enterprise adoption. 기업 도입 증가로 AI 시장 매출과 투자 규모가 계속 커지고 있다는 산업 뉴스다. Tags: AI, market, enterprise, revenue, adoption.",
+      "metadata": {
+        "source_score": 215,
+        "stars": null,
+        "forks": null,
+        "comments": 61,
+        "language": null,
+        "categories": []
+      }
+    }
+  ]
+}
