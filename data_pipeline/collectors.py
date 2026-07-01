@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import ssl
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -11,9 +12,18 @@ from typing import Any
 UA = "khuda-codepulse-data-pipeline"
 
 
+def ssl_context() -> ssl.SSLContext:
+    try:
+        import certifi
+
+        return ssl.create_default_context(cafile=certifi.where())
+    except Exception:
+        return ssl.create_default_context()
+
+
 def fetch_url(url: str) -> bytes:
     req = urllib.request.Request(url, headers={"User-Agent": UA})
-    with urllib.request.urlopen(req, timeout=20) as response:
+    with urllib.request.urlopen(req, timeout=20, context=ssl_context()) as response:
         return response.read()
 
 
@@ -108,4 +118,3 @@ def collect_all(limit_per_source: int = 20) -> list[dict[str, Any]]:
         except Exception as exc:
             rows.append({"source": "error", "title": collector.__name__, "error": str(exc)})
     return rows
-
