@@ -6,10 +6,10 @@
   "description": "A(수집 파이프라인)가 생산하여 B(엔진)·C(피드)가 소비하는 공통 트렌드 항목. 한 소스(arXiv/HN/GitHub)의 데이터를 이 공통 형태로 정규화한 결과.",
   "type": "object",
   "version": "0.1.0",
-  "required": ["id", "source", "title", "summary", "url", "type"],
+  "required": ["trend_id", "source", "title", "summary", "url", "type"],
   "additionalProperties": false,
   "properties": {
-    "id": {
+    "trend_id": {
       "type": "string",
       "description": "트렌드 고유 ID. B/C가 이 값으로 join하므로 전역 유일해야 함. 예: 'arxiv_2406.12345'"
     },
@@ -18,16 +18,28 @@
       "enum": ["arxiv", "hackernews", "github"],
       "description": "데이터 출처"
     },
-    "title": { "type": "string", "description": "트렌드 제목" },
-    "summary": { "type": "string", "description": "초록/설명/본문 요약" },
-    "url": { "type": "string", "format": "uri", "description": "원문 링크" },
+    "title": {
+      "type": "string",
+      "description": "트렌드 제목"
+    },
+    "summary": {
+      "type": "string",
+      "description": "초록/설명/본문 요약"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "원문 링크"
+    },
     "published_at": {
       "type": "string",
       "description": "발행일. ISO 8601 권장 (YYYY-MM-DD 또는 전체 타임스탬프)"
     },
     "authors_or_org": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "description": "작성자 또는 조직"
     },
     "type": {
@@ -37,42 +49,76 @@
     },
     "task_tags": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "maxItems": 3,
       "description": "기술 분야 복수 태그. 예: RAG, Agent, Evaluation (최대 3개)"
     },
     "dependency_tags": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "maxItems": 5,
       "description": "관련 라이브러리 복수 태그. 예: LangChain, PyTorch, Chroma (최대 5개)"
     },
     "impact_tags": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "maxItems": 2,
       "description": "영향 영역 복수 태그. 예: accuracy, speed, cost (최대 2개)"
     },
     "keyword_tags": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "maxItems": 10,
-      "description": "세부 키워드 태그. 예: retrieval, embedding, reranker (최대 5~10개)"
+      "description": "세부 키워드 태그. 예: retrieval, embedding, reranker (최대 10개)"
     },
-    "raw_text": { "type": "string", "description": "원본 텍스트 (선택)" },
+    "raw_text": {
+      "type": "string",
+      "description": "원본 텍스트. arXiv abstract, GitHub description/README 일부, HN text 등 원천 API에서 가져온 텍스트"
+    },
     "embedding_text": {
       "type": "string",
-      "description": "Chroma 임베딩에 사용할 텍스트 (선택)"
+      "description": "Chroma 임베딩에 사용할 텍스트. title, summary, 주요 tags를 조합해 생성"
     },
     "metadata": {
       "type": "object",
-      "description": "검색/필터링용 부가 정보. 소스별로 채워지는 키가 다를 수 있음.",
-      "additionalProperties": true,
+      "description": "source별 원천 API 정보를 보존하기 위한 optional 보조 필드. B트랙 판단 로직은 metadata에 의존하지 않으며, 없는 값은 null 또는 빈 배열로 둔다.",
+      "additionalProperties": false,
       "properties": {
-        "score": { "type": "number", "description": "HN score 또는 정규화 점수" },
-        "comments": { "type": "integer", "description": "댓글 수 (HN)" },
-        "stars": { "type": "integer", "description": "star 수 (GitHub)" },
-        "language": { "type": "string", "description": "주 언어 (GitHub)" }
+        "source_score": {
+          "type": ["number", "null"],
+          "description": "원천 플랫폼 기준 점수. HN score 또는 GitHub stars 기반 값. arXiv는 null 가능"
+        },
+        "stars": {
+          "type": ["integer", "null"],
+          "description": "GitHub star 수"
+        },
+        "forks": {
+          "type": ["integer", "null"],
+          "description": "GitHub fork 수"
+        },
+        "comments": {
+          "type": ["integer", "null"],
+          "description": "HN 댓글 수"
+        },
+        "language": {
+          "type": ["string", "null"],
+          "description": "GitHub repo 주 언어"
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "arXiv category 목록. 예: cs.CL, cs.AI"
+        }
       }
     }
   }
