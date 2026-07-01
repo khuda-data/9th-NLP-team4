@@ -13,6 +13,10 @@ def stable_slug(value: str) -> str:
     return slug[:80] or "unknown"
 
 
+def strip_arxiv_version(arxiv_id: str) -> str:
+    return re.sub(r"v\d+$", "", arxiv_id)
+
+
 def normalize_raw(raw: dict[str, Any]) -> Trend:
     source = str(raw.get("source", "")).lower()
     if source in {"hn", "hacker-news", "hacker_news"}:
@@ -31,7 +35,8 @@ def normalize_raw(raw: dict[str, Any]) -> Trend:
 
     metadata = complete_metadata(raw.get("metadata"))
     if source == "arxiv":
-        arxiv_id = raw.get("arxiv_id") or url.split("/abs/")[-1].replace("v1", "")
+        arxiv_id = raw.get("arxiv_id") or url.split("/abs/")[-1]
+        arxiv_id = strip_arxiv_version(str(arxiv_id))
         trend_id = f"arxiv_{clean(arxiv_id)}"
         trend_type = "paper"
     elif source == "hackernews":
@@ -59,4 +64,3 @@ def normalize_raw(raw: dict[str, Any]) -> Trend:
         "metadata": metadata,
     }
     return trend
-

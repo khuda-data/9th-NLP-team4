@@ -12,54 +12,14 @@ const CACHE_MAX_AGE_MS = 6 * 60 * 60 * 1000; // 6시간
 
 const clean = (s?: string) => (s || "").replace(/\s+/g, " ").trim();
 const truncate = (s: string, n: number) => (s.length > n ? s.slice(0, n) + "…" : s);
-const uniq = (items: string[], max: number) => Array.from(new Set(items.filter(Boolean))).slice(0, max);
 
-function typeHint(text: string): Trend["type"] {
+function categoryHint(text: string): string {
   const t = text.toLowerCase();
-  if (/\bbenchmark|leaderboard|evaluation suite\b/.test(t)) return "benchmark";
-  if (/\blibrary|framework|sdk|toolkit|cli|tool\b/.test(t)) return "tool";
-  if (/\brelease|launch|policy|regulation|lawsuit|acquire|funding\b/.test(t)) return "news";
-  return "paper";
-}
-
-function tagsFor(text: string) {
-  const t = text.toLowerCase();
-  const task = [
-    /\brag|retrieval|embedding|vector\b/.test(t) ? "RAG" : "",
-    /\bagent|tool use|workflow|langgraph\b/.test(t) ? "Agent" : "",
-    /\binference|latency|throughput|quantization|compression\b/.test(t) ? "Inference" : "",
-    /\bfine-?tun|lora|adapter\b/.test(t) ? "Fine-tuning" : "",
-    /\bevaluation|benchmark|leaderboard\b/.test(t) ? "Evaluation" : "",
-    /\bmultimodal|vision-language|vlm|speech|audio|ocr\b/.test(t) ? "Multimodal" : "",
-  ];
-  const deps = [
-    /\blangchain\b/.test(t) ? "LangChain" : "",
-    /\blanggraph\b/.test(t) ? "LangGraph" : "",
-    /\bchroma|chromadb\b/.test(t) ? "Chroma" : "",
-    /\bfaiss\b/.test(t) ? "FAISS" : "",
-    /\bpytorch|torch\b/.test(t) ? "PyTorch" : "",
-    /\btransformers|hugging ?face\b/.test(t) ? "Transformers" : "",
-  ];
-  const impact = [
-    /\baccuracy|quality|recall|precision|rerank/.test(t) ? "accuracy" : "",
-    /\blatency|throughput|speed|fast|batching/.test(t) ? "speed" : "",
-    /\bcost|cheap|efficient|compression|quantization/.test(t) ? "cost" : "",
-    /\bsecurity|vulnerability|prompt injection|misalignment|safety/.test(t) ? "security" : "",
-    /\bproductivity|developer|workflow|automation/.test(t) ? "productivity" : "",
-  ];
-  const keywords = ["retrieval", "embedding", "vector search", "reranker", "benchmark", "quantization", "tool use", "workflow", "safety", "ocr"]
-    .filter((kw) => t.includes(kw));
-  return {
-    task_tags: uniq(task, 3),
-    dependency_tags: uniq(deps, 5),
-    impact_tags: uniq(impact, 2),
-    keyword_tags: uniq(keywords, 10),
-  };
-}
-
-function embeddingText(t: Pick<Trend, "title" | "summary" | "task_tags" | "dependency_tags" | "impact_tags" | "keyword_tags">) {
-  const tags = [...(t.task_tags || []), ...(t.dependency_tags || []), ...(t.impact_tags || []), ...(t.keyword_tags || [])];
-  return clean(`${t.title}. ${t.summary}. Tags: ${tags.join(", ")}.`);
+  if (/\b(release|launch|gpt-|claude|gemini|llama|mistral|model card|introducing)\b/.test(t)) return "모델 출시";
+  if (/\b(agent|rag|retrieval|fine-?tun|benchmark|sota|architecture|method)\b/.test(t)) return "기법/연구";
+  if (/\b(library|framework|sdk|open[- ]?source|toolkit|cli)\b/.test(t)) return "툴/라이브러리";
+  if (/\b(funding|raises|policy|regulation|lawsuit|acquire)\b/.test(t)) return "산업/정책";
+  return "기타";
 }
 
 async function fetchArxiv(): Promise<Trend[]> {
@@ -71,29 +31,16 @@ async function fetchArxiv(): Promise<Trend[]> {
   const entries = xml.split("<entry>").slice(1);
   return entries.map((e) => {
     const get = (tag: string) => { const m = e.match(new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`)); return m ? clean(m[1]) : ""; };
-    const link = clean((e.match(/<id>([\s\S]*?)<\/id>/) || [])[1] || "");
+    const link = (e.match(/<id>([\s\S]*?)<\/id>/) || [])[1] || "";
     const title = get("title");
-    const rawSummary = get("summary");
-    const summary = truncate(rawSummary, 500);
-    const authors = Array.from(e.matchAll(/<name>([\s\S]*?)<\/name>/g)).map((m) => clean(m[1]));
-    const categories = Array.from(e.matchAll(/<category term="([^"]+)"/g)).map((m) => clean(m[1]));
-    const arxivId = link.split("/abs/")[1]?.replace(/v\d+$/, "") || title.toLowerCase().replace(/\W+/g, "_").slice(0, 60);
-    const tags = tagsFor(title + " " + rawSummary);
-    const trend: Trend = {
-      trend_id: `arxiv_${arxivId}`,
-      source: "arxiv",
-      title,
-      summary,
-      url: link,
-      published_at: (e.match(/<published>([\s\S]*?)<\/published>/) || [])[1] || "",
-      authors_or_org: authors,
-      type: "paper",
-      ...tags,
-      raw_text: rawSummary,
-      metadata: { source_score: null, stars: null, forks: null, comments: null, language: null, categories },
-    };
-    trend.embedding_text = embeddingText(trend);
-    return trend;
+    const summary = get("summary");
+    return {
+      id: "", source: "arXiv", title, url: clean(link),
+      published: (e.match(/<published>([\s\S]*?)<\/published>/) || [])[1] || "",
+      summary: truncate(summary, 400),
+      signal: "최신 제출 (cs.AI/CL/LG)",
+      category: categoryHint(title + " " + summary),
+    } as Trend;
   });
 }
 
@@ -105,25 +52,15 @@ async function fetchHN(): Promise<Trend[]> {
   const res = await fetch(url, { headers: { "User-Agent": UA } });
   const j = await res.json();
   const hits = ((j.hits || []) as any[]).sort((a, b) => (b.points || 0) - (a.points || 0)).slice(0, N_HN);
-  return hits.map((h) => {
-    const title = clean(h.title);
-    const tags = tagsFor(title);
-    const trend: Trend = {
-      trend_id: `hackernews_${h.objectID}`,
-      source: "hackernews",
-      title,
-      url: h.url || `https://news.ycombinator.com/item?id=${h.objectID}`,
-      published_at: h.created_at || "",
-      summary: title,
-      authors_or_org: h.author ? [h.author] : [],
-      type: typeHint(title),
-      ...tags,
-      raw_text: title,
-      metadata: { source_score: h.points || 0, stars: null, forks: null, comments: h.num_comments || 0, language: null, categories: [] },
-    };
-    trend.embedding_text = embeddingText(trend);
-    return trend;
-  });
+  return hits.map((h) => ({
+    id: "", source: "HackerNews", title: clean(h.title),
+    url: h.url || `https://news.ycombinator.com/item?id=${h.objectID}`,
+    published: h.created_at || "",
+    summary: "",
+    signal: `${h.points || 0} points · ${h.num_comments || 0} comments`,
+    category: categoryHint(h.title || ""),
+    discussion: `https://news.ycombinator.com/item?id=${h.objectID}`,
+  }) as Trend);
 }
 
 async function fetchGitHub(): Promise<Trend[]> {
@@ -136,26 +73,14 @@ async function fetchGitHub(): Promise<Trend[]> {
   const res = await fetch(url, { headers });
   const j = await res.json();
   if (!j.items) throw new Error("GitHub 응답 이상: " + JSON.stringify(j).slice(0, 200));
-  return (j.items as any[]).map((r) => {
-    const title = clean(r.full_name);
-    const summary = truncate(clean(r.description || title), 400);
-    const tags = tagsFor(title + " " + summary + " " + (r.language || ""));
-    const trend: Trend = {
-      trend_id: `github_${String(r.full_name || "").toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
-      source: "github",
-      title,
-      url: r.html_url,
-      published_at: r.created_at || "",
-      summary,
-      authors_or_org: r.owner?.login ? [r.owner.login] : [],
-      type: "repo",
-      ...tags,
-      raw_text: summary,
-      metadata: { source_score: r.stargazers_count || 0, stars: r.stargazers_count || 0, forks: r.forks_count || 0, comments: null, language: r.language || null, categories: [] },
-    };
-    trend.embedding_text = embeddingText(trend);
-    return trend;
-  });
+  return (j.items as any[]).map((r) => ({
+    id: "", source: "GitHub", title: r.full_name,
+    url: r.html_url,
+    published: r.created_at || "",
+    summary: truncate(clean(r.description || ""), 300),
+    signal: `★ ${r.stargazers_count} · ${r.language || "?"}`,
+    category: "툴/라이브러리",
+  }) as Trend);
 }
 
 async function collectFresh(): Promise<Trend[]> {
@@ -168,6 +93,7 @@ async function collectFresh(): Promise<Trend[]> {
       console.error("trend source 실패:", (err as Error).message);
     }
   }
+  results.forEach((r, i) => (r.id = "T" + String(i + 1).padStart(2, "0")));
   return results;
 }
 

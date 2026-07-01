@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import ssl
 import urllib.parse
 import urllib.request
@@ -10,6 +11,10 @@ from typing import Any
 
 
 UA = "khuda-codepulse-data-pipeline"
+
+
+def strip_arxiv_version(arxiv_id: str) -> str:
+    return re.sub(r"v\d+$", "", arxiv_id)
 
 
 def ssl_context() -> ssl.SSLContext:
@@ -47,7 +52,7 @@ def collect_arxiv(limit: int = 20) -> list[dict[str, Any]]:
         rows.append(
             {
                 "source": "arxiv",
-                "arxiv_id": url.split("/abs/")[-1].replace("v1", ""),
+                "arxiv_id": strip_arxiv_version(url.split("/abs/")[-1]),
                 "title": entry.findtext("atom:title", default="", namespaces=ns),
                 "summary": entry.findtext("atom:summary", default="", namespaces=ns),
                 "url": url,

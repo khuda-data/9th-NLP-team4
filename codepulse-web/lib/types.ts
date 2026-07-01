@@ -1,28 +1,15 @@
 // CodePulse 공용 타입
 
 export type Trend = {
-  trend_id: string;
-  source: "arxiv" | "hackernews" | "github";
+  id: string;
+  source: string;
   title: string;
-  summary: string;
   url: string;
-  published_at?: string;
-  authors_or_org?: string[];
-  type: "paper" | "tool" | "repo" | "news" | "benchmark";
-  task_tags?: string[];
-  dependency_tags?: string[];
-  impact_tags?: string[];
-  keyword_tags?: string[];
-  raw_text?: string;
-  embedding_text?: string;
-  metadata?: {
-    source_score?: number | null;
-    stars?: number | null;
-    forks?: number | null;
-    comments?: number | null;
-    language?: string | null;
-    categories?: string[];
-  };
+  published?: string;
+  summary?: string;
+  signal?: string;
+  category?: string;
+  discussion?: string;
 };
 
 export type Classification = "영향" | "대체후보" | "신규적용";
