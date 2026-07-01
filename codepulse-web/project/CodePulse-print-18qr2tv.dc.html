@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style data-omelette-print-defaults>
+@media print {
+  @page { margin: 0.5in; }
+  h1, h2, h3, h4, h5, h6 { break-after: avoid; }
+  figure, table, pre, blockquote, img, svg, tr, [class~="card" i] { break-inside: avoid; }
+  img, svg { max-width: 100%; }
+  p { orphans: 3; widows: 3; }
+}
+</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  ::selection { background: rgba(255,56,92,0.16); }
+  input { font-family: 'JetBrains Mono', monospace; }
+  input::placeholder { color: #c1c1c1; }
+  @keyframes cp-spin { to { transform: rotate(360deg); } }
+  @keyframes cp-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes cp-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+</style>
+</helmet>
+<div style="min-height:100vh; background:#ffffff; color:#222222; font-family:'Inter',-apple-system,system-ui,sans-serif; -webkit-font-smoothing:antialiased;">
+
+  <header style="position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between; height:64px; padding:0 28px; background:rgba(255,255,255,0.92); backdrop-filter:saturate(180%) blur(8px); border-bottom:1px solid #ebebeb;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div style="width:13px; height:13px; border-radius:9999px; background:{{ brand }};"></div>
+      <span style="font-size:17px; font-weight:700; letter-spacing:-0.4px;">CodePulse</span>
+      <span style="font-size:13px; color:#929292; font-weight:500; margin-left:2px;">· 내 코드에 맞는 AI 트렌드 매칭</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:18px;">
+      <span style="font-size:13px; color:#6a6a6a; font-weight:500;">2026. 06. 28 기준</span>
+      <span style="font-size:14px; color:#222222; font-weight:600; border-bottom:1.5px solid #222222; padding-bottom:1px; cursor:pointer;">작동 방식</span>
+    </div>
+  </header>
+
+  <main style="max-width:1000px; margin:0 auto;">
+
+    <!-- ============ INPUT ============ -->
+    <sc-if value="{{ isInput }}" hint-placeholder-val="{{ true }}">
+    <section style="padding:76px 28px 88px;">
+      <div style="display:inline-flex; align-items:center; gap:8px; padding:7px 14px; border:1px solid #ebebeb; border-radius:9999px; background:#f7f7f7; font-size:13px; font-weight:600; color:#6a6a6a; margin-bottom:24px;">
+        <span style="width:7px; height:7px; border-radius:9999px; background:{{ brand }};"></span>
+        GitHub 레포 × 오늘의 AI 트렌드
+      </div>
+      <h1 style="margin:0; font-size:44px; line-height:1.12; font-weight:600; letter-spacing:-1.4px; max-width:760px; text-wrap:balance;">내 코드에 의미 있는 AI 트렌드만, 오늘 단위로.</h1>
+      <p style="margin:20px 0 0; font-size:17px; line-height:1.6; color:#6a6a6a; max-width:600px;">레포 주소만 넣으면 오늘 나온 트렌드 중 당신의 코드와 맞닿은 것만 골라 <b style="color:#3f3f3f; font-weight:600;">대체후보 · 신규적용 · 영향</b>으로 분류해 드려요.</p>
+
+      <!-- pill bar -->
+      <div style="display:flex; align-items:center; gap:0; max-width:780px; margin-top:36px; background:#ffffff; border:1px solid #dddddd; border-radius:9999px; box-shadow:rgba(0,0,0,0.02) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px 0, rgba(0,0,0,0.1) 0 4px 10px 0; padding:6px 6px 6px 0;">
+        <label style="flex:1.5; display:block; padding:11px 26px; cursor:text;">
+          <div style="font-size:12px; font-weight:700; color:#222222; letter-spacing:0.1px; margin-bottom:3px;">GitHub 레포</div>
+          <input value="{{ repoUrl }}" onChange="{{ updateRepo }}" placeholder="github.com/your-org/your-repo" style="width:100%; border:none; outline:none; background:transparent; font-size:14.5px; color:#222222; padding:0;">
+        </label>
+        <div style="width:1px; height:38px; background:#dddddd;"></div>
+        <label style="flex:1; display:block; padding:11px 26px; cursor:text;">
+          <div style="font-size:12px; font-weight:700; color:#222222; letter-spacing:0.1px; margin-bottom:3px;">Gemini API 키</div>
+          <input value="{{ apiKey }}" onChange="{{ updateKey }}" placeholder="AIza…" style="width:100%; border:none; outline:none; background:transparent; font-size:14.5px; color:#222222; padding:0;">
+        </label>
+        <button onClick="{{ onAnalyze }}" aria-label="분석" style="flex:none; width:54px; height:54px; margin-left:6px; border:none; border-radius:9999px; background:{{ brand }}; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><line x1="16.5" y1="16.5" x2="21" y2="21" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:18px; margin-top:18px; flex-wrap:wrap;">
+        <span onClick="{{ fillSample }}" style="font-size:13px; font-weight:600; color:#222222; border-bottom:1.5px solid #222222; padding-bottom:1px; cursor:pointer;">예시 레포로 채우기</span>
+        <span style="font-size:12px; color:#929292;">키는 브라우저에서만 쓰이고 저장되지 않아요.</span>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:10px; margin-top:30px;">
+        <span style="font-size:12.5px; color:#929292; font-weight:600; letter-spacing:0.2px;">분석에 쓰는 공개 트렌드 소스</span>
+        <div style="height:1px; flex:1; max-width:40px; background:#ebebeb;"></div>
+        <div style="display:flex; gap:8px;">
+          <span style="font-size:12.5px; font-weight:600; color:#3f3f3f; background:#f7f7f7; border:1px solid #ebebeb; border-radius:9999px; padding:5px 12px;">arXiv</span>
+          <span style="font-size:12.5px; font-weight:600; color:#3f3f3f; background:#f7f7f7; border:1px solid #ebebeb; border-radius:9999px; padding:5px 12px;">Hacker News</span>
+          <span style="font-size:12.5px; font-weight:600; color:#3f3f3f; background:#f7f7f7; border:1px solid #ebebeb; border-radius:9999px; padding:5px 12px;">GitHub Trending</span>
+        </div>
+      </div>
+
+      <!-- taxonomy preview -->
+      <div style="margin-top:64px;">
+        <div style="font-size:13px; font-weight:700; color:#929292; letter-spacing:0.3px; text-transform:uppercase; margin-bottom:18px;">이렇게 분류해 드려요</div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+          <div style="border:1px solid #ebebeb; border-radius:16px; padding:22px;">
+            <div style="display:inline-flex; align-items:center; gap:7px; padding:5px 11px; border-radius:9999px; background:#ffeef2; color:#e00b41; font-size:12.5px; font-weight:700;"><span style="width:7px;height:7px;border-radius:9999px;background:#e00b41;"></span>대체후보</div>
+            <p style="margin:14px 0 0; font-size:14.5px; line-height:1.55; color:#3f3f3f;">지금 코드가 쓰는 기술을 더 나은 최신 것으로 <b style="font-weight:600;">바꿀</b> 후보.</p>
+          </div>
+          <div style="border:1px solid #ebebeb; border-radius:16px; padding:22px;">
+            <div style="display:inline-flex; align-items:center; gap:7px; padding:5px 11px; border-radius:9999px; background:#f1eaf8; color:#460479; font-size:12.5px; font-weight:700;"><span style="width:7px;height:7px;border-radius:9999px;background:#460479;"></span>신규적용</div>
+            <p style="margin:14px 0 0; font-size:14.5px; line-height:1.55; color:#3f3f3f;">아직 안 쓰지만 코드에 <b style="font-weight:600;">새로 붙이면</b> 좋을 기법.</p>
+          </div>
+          <div style="border:1px solid #ebebeb; border-radius:16px; padding:22px;">
+            <div style="display:inline-flex; align-items:center; gap:7px; padding:5px 11px; border-radius:9999px; background:#fbe7f0; color:#92174d; font-size:12.5px; font-weight:700;"><span style="width:7px;height:7px;border-radius:9999px;background:#92174d;"></span>영향</div>
+            <p style="margin:14px 0 0; font-size:14.5px; line-height:1.55; color:#3f3f3f;">의존성·릴리스 변화가 코드에 <b style="font-weight:600;">미칠</b> 파장.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    </sc-if>
+
+    <!-- ============ ANALYZING ============ -->
+    <sc-if value="{{ isAnalyzing }}">
+    <section style="padding:96px 28px; display:flex; flex-direction:column; align-items:center;">
+      <div style="display:inline-flex; align-items:center; gap:9px; padding:8px 16px; border-radius:9999px; background:#f7f7f7; border:1px solid #ebebeb; margin-bottom:36px;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:13.5px; font-weight:600; color:#222222; white-space:nowrap;">{{ repoDisplay }}</span>
+        <span style="font-size:13px; color:#6a6a6a; white-space:nowrap;">분석 중…</span>
+      </div>
+      <div style="width:100%; max-width:560px; display:flex; flex-direction:column; gap:6px;">
+        <sc-for list="{{ steps }}" as="step" hint-placeholder-count="4">
+          <div style="display:flex; align-items:center; gap:16px; padding:16px 4px;">
+            <div style="flex:none; width:34px; height:34px; border-radius:9999px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; background:{{ step.dotBg }}; color:{{ step.dotColor }}; border:1px solid {{ step.dotBorder }};">{{ step.n }}</div>
+            <div style="flex:1;">
+              <div style="font-size:15.5px; font-weight:600; color:{{ step.labelColor }};">{{ step.label }}</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:12.5px; color:#929292; margin-top:2px;">{{ step.sub }}</div>
+            </div>
+            <sc-if value="{{ step.isActive }}">
+              <div style="flex:none; width:18px; height:18px; border-radius:9999px; border:2px solid #ffe1e8; border-top-color:{{ brand }}; animation:cp-spin 0.7s linear infinite;"></div>
+            </sc-if>
+            <sc-if value="{{ step.isDone }}">
+              <span style="flex:none; font-size:13px; font-weight:600; color:#428bff;">완료</span>
+            </sc-if>
+            <sc-if value="{{ step.isIdle }}">
+              <span style="flex:none; font-size:13px; font-weight:500; color:#c1c1c1;">대기</span>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+      <p style="margin:40px 0 0; font-size:13px; color:#929292;">공개 트렌드 API와 입력하신 Gemini 키로 처리됩니다.</p>
+    </section>
+    </sc-if>
+
+    <!-- ============ RESULTS ============ -->
+    <sc-if value="{{ isResults }}">
+    <section style="padding:44px 28px 96px;">
+      <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap;">
+        <div>
+          <div style="font-size:12.5px; font-weight:700; color:#428bff; letter-spacing:0.3px; text-transform:uppercase; margin-bottom:8px;">분석 완료</div>
+          <h2 style="margin:0; font-family:'JetBrains Mono',monospace; font-size:24px; font-weight:600; letter-spacing:-0.5px;">{{ repoDisplay }}</h2>
+          <div style="font-size:13.5px; color:#929292; margin-top:6px;">2026. 06. 28 트렌드 기준 분석</div>
+        </div>
+        <button onClick="{{ onReset }}" style="flex:none; height:46px; padding:0 20px; border:1px solid #222222; border-radius:8px; background:#ffffff; color:#222222; font-size:15px; font-weight:600; cursor:pointer; white-space:nowrap;">다시 분석</button>
+      </div>
+
+      <div style="margin-top:26px; padding:22px 24px; background:#f7f7f7; border-radius:16px; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;">
+        <div style="font-size:16px; color:#222222; line-height:1.5;">오늘 수집한 트렌드 <b style="font-weight:700;">142개</b> 중 <b style="font-weight:700; color:{{ brand }};">8개</b>가 이 레포와 맞닿아 있어요.</div>
+        <div style="display:flex; gap:18px;">
+          <div style="display:flex; align-items:center; gap:7px; font-size:14px; font-weight:600; color:#3f3f3f;"><span style="width:8px;height:8px;border-radius:9999px;background:#e00b41;"></span>대체후보 3</div>
+          <div style="display:flex; align-items:center; gap:7px; font-size:14px; font-weight:600; color:#3f3f3f;"><span style="width:8px;height:8px;border-radius:9999px;background:#460479;"></span>신규적용 3</div>
+          <div style="display:flex; align-items:center; gap:7px; font-size:14px; font-weight:600; color:#3f3f3f;"><span style="width:8px;height:8px;border-radius:9999px;background:#92174d;"></span>영향 2</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:26px; flex-wrap:wrap;">
+        <sc-for list="{{ filters }}" as="f" hint-placeholder-count="4">
+          <button onClick="{{ f.onClick }}" style="height:40px; padding:0 18px; border-radius:9999px; border:1px solid {{ f.border }}; background:{{ f.bg }}; color:{{ f.color }}; font-size:14px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:7px; white-space:nowrap;">
+            {{ f.label }}<span style="opacity:0.55; font-weight:500;">{{ f.count }}</span>
+          </button>
+        </sc-for>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:14px; margin-top:22px;">
+        <sc-for list="{{ cards }}" as="c" hint-placeholder-count="5">
+          <div style="border:1px solid #ebebeb; border-radius:18px; background:#ffffff; padding:24px 26px; animation:cp-fade 0.35s ease both;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="display:inline-flex; align-items:center; gap:7px; padding:5px 12px; border-radius:9999px; background:{{ c.tint }}; color:{{ c.accent }}; font-size:12.5px; font-weight:700;"><span style="width:7px;height:7px;border-radius:9999px;background:{{ c.accent }};"></span>{{ c.catLabel }}</span>
+              <span style="font-size:12.5px; font-weight:600; color:#6a6a6a; background:#f7f7f7; border-radius:6px; padding:4px 9px;">{{ c.source }}</span>
+              <span style="font-size:13px; color:#929292;">{{ c.date }}</span>
+              <div style="margin-left:auto; display:flex; align-items:center; gap:9px;">
+                <span style="font-size:11.5px; font-weight:700; color:#929292; letter-spacing:0.1px;">관련도</span>
+                <div style="width:56px; height:5px; border-radius:9999px; background:#ebebeb; overflow:hidden;">
+                  <div style="width:{{ c.score }}%; height:100%; background:{{ c.accent }}; border-radius:9999px;"></div>
+                </div>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:13.5px; font-weight:600; color:#222222; min-width:22px; text-align:right;">{{ c.score }}</span>
+              </div>
+              <button onClick="{{ c.onToggle }}" style="border:none; background:transparent; cursor:pointer; font-size:13.5px; font-weight:600; color:#6a6a6a; white-space:nowrap;">
+                <sc-if value="{{ c.open }}">접기 ↑</sc-if>
+                <sc-if value="{{ c.closed }}">자세히 ↓</sc-if>
+              </button>
+            </div>
+
+            <h3 style="margin:15px 0 0; font-size:19px; font-weight:600; letter-spacing:-0.4px; color:#222222;">{{ c.title }}</h3>
+            <p style="margin:8px 0 0; font-size:15px; line-height:1.55; color:#3f3f3f; max-width:760px;">{{ c.reason }}</p>
+
+            <div style="display:inline-flex; align-items:center; gap:8px; margin-top:16px; padding:7px 12px; background:#f7f7f7; border:1px solid #ebebeb; border-radius:8px;">
+              <span style="font-size:11.5px; font-weight:700; color:#929292; letter-spacing:0.2px;">관련 파일</span>
+              <span style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:#222222;">{{ c.file }}</span>
+            </div>
+
+            <sc-if value="{{ c.open }}">
+              <div style="margin-top:22px; padding-top:22px; border-top:1px solid #ebebeb;">
+                <p style="margin:0; font-size:15px; line-height:1.65; color:#3f3f3f; max-width:760px;">{{ c.detail }}</p>
+                <div style="margin-top:20px; display:flex; align-items:flex-start; gap:12px;">
+                  <span style="flex:none; font-size:11.5px; font-weight:700; color:{{ c.accent }}; background:{{ c.tint }}; border-radius:6px; padding:5px 10px; letter-spacing:0.2px;">추천 액션</span>
+                  <span style="font-size:15px; font-weight:600; color:#222222; line-height:1.5;">{{ c.action }}</span>
+                </div>
+                <div style="margin-top:20px;">
+                  <span style="display:inline-flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:#222222; border:1px solid #dddddd; border-radius:9999px; padding:8px 15px; cursor:pointer;">{{ c.link }} ↗</span>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+    </sc-if>
+
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;brandColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#ff385c&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#ff385c&quot;,&quot;#6d28a8&quot;,&quot;#0f7a6b&quot;,&quot;#222222&quot;],&quot;section&quot;:&quot;Brand&quot;}}">
+class Component extends DCLogic {
+  state = { view: 'input', repoUrl: '', apiKey: '', stepIndex: -1, filter: 'all', openId: 't1' };
+
+  CATS = {
+    replace: { label: '대체후보', accent: '#e00b41', tint: '#ffeef2' },
+    apply:   { label: '신규적용', accent: '#460479', tint: '#f1eaf8' },
+    impact:  { label: '영향',     accent: '#92174d', tint: '#fbe7f0' },
+  };
+
+  STEPS = [
+    { n: '1', label: '레포 클론',            sub: 'git clone' },
+    { n: '2', label: '트렌드 수집',          sub: 'arXiv · Hacker News · GitHub' },
+    { n: '3', label: '코드 ↔ 트렌드 대조',   sub: 'Google Gemini' },
+    { n: '4', label: '분류 결과 생성',        sub: '대체후보 · 신규적용 · 영향' },
+  ];
+
+  DATA = [
+    { id:'t1', cat:'replace', title:'vLLM 0.9 — 연속 배칭', source:'GitHub Trending', date:'6월 27일',
+      reason:'지금 transformers.pipeline()로 요청을 순차 추론 중 — vLLM 연속 배칭이면 같은 GPU에서 처리량이 크게 올라요.',
+      file:'api/inference.py',
+      detail:'inference.py의 동기 추론 루프가 요청을 한 건씩 처리하고 있어 GPU 점유율이 낮습니다. vLLM의 continuous batching과 PagedAttention으로 바꾸면 같은 하드웨어에서 동시 처리량이 수 배 늘고, OpenAI 호환 서버로 띄우면 클라이언트 코드 변경도 거의 없습니다.',
+      action:'추론 서버를 vLLM OpenAI-compatible 엔드포인트로 교체',
+      link:'github.com/vllm-project/vllm' },
+    { id:'t2', cat:'replace', title:'BGE-M3 다국어 임베딩', source:'arXiv', date:'6월 26일',
+      reason:'ada-002로 한국어 문서를 임베딩 중 — BGE-M3가 다국어·롱컨텍스트 검색에서 더 좋은 회수율을 보여요.',
+      file:'lib/embeddings.ts',
+      detail:'embeddings.ts가 OpenAI text-embedding-ada-002를 호출합니다. 한국어가 섞인 사내 문서 검색에서는 BGE-M3가 회수율이 높고, 8192 토큰까지 한 번에 임베딩해 청크 경계 손실이 줄어듭니다. 자체 호스팅하면 임베딩 비용도 사라집니다.',
+      action:'임베딩 모델을 BGE-M3로 교체하고 벡터 차원 마이그레이션',
+      link:'huggingface.co/BAAI/bge-m3' },
+    { id:'t3', cat:'replace', title:'Qdrant 1.12 하이브리드 검색', source:'Hacker News', date:'6월 25일',
+      reason:'인메모리 코사인 검색을 쓰는데 — Qdrant 하이브리드(BM25+벡터)면 정확도와 영속성을 같이 얻어요.',
+      file:'lib/vectorstore.py',
+      detail:'vectorstore.py가 NumPy 배열로 코사인 유사도를 직접 계산합니다. 문서가 늘면 메모리와 지연이 같이 커지고 재시작 시 인덱스가 사라집니다. Qdrant 1.12의 하이브리드 검색으로 옮기면 키워드와 벡터를 함께 쓰고 디스크 영속성도 확보됩니다.',
+      action:'벡터 스토어를 Qdrant로 이전하고 하이브리드 쿼리 적용',
+      link:'github.com/qdrant/qdrant' },
+    { id:'t4', cat:'apply', title:'DSPy 2.6 — 프롬프트 컴파일', source:'arXiv', date:'6월 28일',
+      reason:'프롬프트를 텍스트 파일로 하드코딩 중 — DSPy로 예시 기반 자동 최적화를 붙일 수 있어요.',
+      file:'prompts/classify.txt',
+      detail:'classify.txt의 분류 프롬프트가 수작업으로 다듬어져 있습니다. DSPy 2.6으로 옮기면 라벨링된 예시로 프롬프트를 컴파일·최적화해 분류 일관성을 끌어올릴 수 있고, 모델을 교체해도 재컴파일만 하면 됩니다.',
+      action:'분류 단계를 DSPy 모듈로 감싸고 few-shot 컴파일 도입',
+      link:'github.com/stanfordnlp/dspy' },
+    { id:'t5', cat:'apply', title:'Structured Outputs (JSON Schema)', source:'GitHub', date:'6월 27일',
+      reason:'분류 결과 JSON을 정규식으로 파싱 중 — 스키마 강제 출력으로 파싱 실패를 없앨 수 있어요.',
+      file:'api/analyze/route.ts',
+      detail:'route.ts가 모델 응답에서 정규식으로 JSON을 긁어냅니다. 가끔 깨진 JSON으로 실패하죠. Gemini의 구조화 출력(responseSchema)으로 카테고리·근거 필드를 강제하면 파싱 단계를 통째로 제거할 수 있습니다.',
+      action:'responseSchema로 분류 출력 스키마를 고정',
+      link:'ai.google.dev/gemini-api/docs/structured-output' },
+    { id:'t6', cat:'apply', title:'시맨틱 캐싱 (GPTCache)', source:'Hacker News', date:'6월 24일',
+      reason:'비슷한 질의가 반복돼요 — 시맨틱 캐시를 두면 Gemini 호출 수와 비용이 줄어요.',
+      file:'lib/gemini.ts',
+      detail:'gemini.ts가 매 요청마다 모델을 호출합니다. 같은 레포를 짧은 간격으로 다시 분석하면 동일·유사 질의가 반복됩니다. GPTCache 같은 시맨틱 캐시를 앞단에 두면 임베딩 유사도로 캐시 히트를 잡아 호출량을 줄입니다.',
+      action:'Gemini 호출 앞단에 시맨틱 캐시 레이어 추가',
+      link:'github.com/zilliztech/GPTCache' },
+    { id:'t7', cat:'impact', title:'Next.js 15.3 — Turbopack 정식', source:'GitHub Release', date:'6월 26일',
+      reason:'지금 webpack으로 빌드 중 — Turbopack 정식 전환으로 빌드가 빨라지지만 설정 변경이 필요해요.',
+      file:'next.config.js',
+      detail:'next.config.js가 커스텀 webpack 설정에 의존합니다. 15.3에서 Turbopack이 정식이 되며 일부 로더·플러그인 설정을 옮겨야 합니다. 빌드와 HMR 속도는 크게 개선되지만 마이그레이션 점검이 필요합니다.',
+      action:'Turbopack 호환성 점검 후 빌드 파이프라인 전환',
+      link:'nextjs.org/blog' },
+    { id:'t8', cat:'impact', title:'LangChain 0.4 — 인터페이스 변경', source:'Hacker News', date:'6월 23일',
+      reason:'0.3 체인 API를 쓰는데 — 0.4에서 일부 인터페이스가 바뀌어 마이그레이션이 필요해요.',
+      file:'lib/chain.ts',
+      detail:'chain.ts가 LangChain 0.3의 체인 구성 API를 사용합니다. 0.4에서 일부 import 경로와 러너 인터페이스가 변경되어 그대로 업그레이드하면 빌드가 깨질 수 있습니다. 변경점을 확인하고 단계적으로 올리세요.',
+      action:'0.4 마이그레이션 가이드 기준으로 체인 코드 점검',
+      link:'github.com/langchain-ai/langchain' },
+  ];
+
+  startAnalyze = () => {
+    if (this._t) clearInterval(this._t);
+    this.setState({ view: 'analyzing', stepIndex: 0 });
+    this._t = setInterval(() => {
+      this.setState(s => {
+        const next = s.stepIndex + 1;
+        if (next >= this.STEPS.length) {
+          clearInterval(this._t);
+          return { view: 'results', stepIndex: this.STEPS.length };
+        }
+        return { stepIndex: next };
+      });
+    }, 850);
+  };
+
+  reset = () => {
+    if (this._t) clearInterval(this._t);
+    this.setState({ view: 'input', stepIndex: -1, openId: 't1', filter: 'all' });
+  };
+
+  fillSample = () => {
+    this.setState({ repoUrl: 'khuda-team4/rag-chat-service', apiKey: 'AIzaSyD-demo-key-7Q2x' });
+  };
+
+  componentWillUnmount() { if (this._t) clearInterval(this._t); }
+
+  renderVals() {
+    const s = this.state;
+    const brand = this.props.brandColor || '#ff385c';
+    const repoDisplay = (s.repoUrl || '').trim() || 'khuda-team4/rag-chat-service';
+    const count = k => this.DATA.filter(d => d.cat === k).length;
+
+    const filters = [
+      { key: 'all', label: '전체', count: this.DATA.length },
+      { key: 'replace', label: '대체후보', count: count('replace') },
+      { key: 'apply', label: '신규적용', count: count('apply') },
+      { key: 'impact', label: '영향', count: count('impact') },
+    ].map(f => {
+      const active = s.filter === f.key;
+      return { ...f, onClick: () => this.setState({ filter: f.key }),
+        bg: active ? '#222222' : '#ffffff',
+        color: active ? '#ffffff' : '#222222',
+        border: active ? '#222222' : '#dddddd' };
+    });
+
+    const SCORES = { t1: 94, t2: 88, t3: 82, t4: 79, t5: 91, t6: 73, t7: 68, t8: 76 };
+    const cards = this.DATA
+      .filter(d => s.filter === 'all' || d.cat === s.filter)
+      .map(d => {
+        const c = this.CATS[d.cat];
+        const open = s.openId === d.id;
+        return { ...d, catLabel: c.label, accent: c.accent, tint: c.tint,
+          score: SCORES[d.id], open, closed: !open,
+          onToggle: () => this.setState(st => ({ openId: st.openId === d.id ? null : d.id })) };
+      })
+      .sort((a, b) => b.score - a.score);
+
+    const steps = this.STEPS.map((st, i) => {
+      const status = i < s.stepIndex ? 'done' : (i === s.stepIndex ? 'active' : 'idle');
+      return { ...st,
+        isDone: status === 'done', isActive: status === 'active', isIdle: status === 'idle',
+        dotBg: status === 'idle' ? '#ffffff' : (status === 'done' ? '#428bff' : brand),
+        dotColor: status === 'idle' ? '#929292' : '#ffffff',
+        dotBorder: status === 'idle' ? '#dddddd' : 'transparent',
+        labelColor: status === 'idle' ? '#929292' : '#222222' };
+    });
+
+    return {
+      brand,
+      isInput: s.view === 'input', isAnalyzing: s.view === 'analyzing', isResults: s.view === 'results',
+      repoUrl: s.repoUrl, apiKey: s.apiKey,
+      updateRepo: e => this.setState({ repoUrl: e.target.value }),
+      updateKey: e => this.setState({ apiKey: e.target.value }),
+      onAnalyze: this.startAnalyze, onReset: this.reset, fillSample: this.fillSample,
+      repoDisplay, filters, cards, steps,
+    };
+  }
+}
+</script>
+<script>
+(async () => {
+  if (!document.title || !document.title.trim()) document.title = "CodePulse";
+  // Prepend so page-supplied @page / break rules (deck-stage's margin:0,
+  // author CSS) keep source-order precedence over the baseline.
+  const baseCss = document.createElement('style');
+  baseCss.textContent = "@media print {\n  figure, table { break-inside: avoid; }\n  *, *::before, *::after {\n    print-color-adjust: exact; -webkit-print-color-adjust: exact;\n    backdrop-filter: none !important; -webkit-backdrop-filter: none !important;\n    animation-delay: -99s !important; animation-duration: .001s !important;\n    animation-iteration-count: 1 !important; animation-fill-mode: both !important;\n    animation-play-state: running !important; transition-duration: 0s !important;\n  }\n}";
+  document.head.prepend(baseCss);
+  if (document.readyState === 'loading') {
+    await new Promise((r) => document.addEventListener('DOMContentLoaded', r, { once: true }));
+  }
+  let ds = document.querySelector('deck-stage');
+  // whenDefined never resolves when nothing registers the element, so only
+  // await it when a <deck-stage> tag exists (and race a timeout regardless).
+  if (ds && !customElements.get('deck-stage')) {
+    try {
+      await Promise.race([
+        customElements.whenDefined('deck-stage'),
+        new Promise((r) => setTimeout(r, 3000)),
+      ]);
+    } catch (e) {}
+    ds = document.querySelector('deck-stage');
+  }
+  // dc-runtime assigns window.DCLogic at init and mounts into #dc-root on
+  // DOMContentLoaded; settle on that subtree so React has rendered before
+  // print(). Non-DC pages fall through to weighing body.
+  const isDc = !ds && 'DCLogic' in window;
+  const settleRoot = ds || (isDc ? document.getElementById('dc-root') : null) || document.body;
+  if (settleRoot) {
+    // Weigh only content children — skip script/style/template so inline
+    // Babel/CSS doesn't register as stable "content" before the framework
+    // has mounted anything.
+    const MEDIA = 'img,svg,canvas,video,picture,iframe,embed,object';
+    const weigh = () => {
+      let text = 0, media = 0;
+      for (const c of settleRoot.children) {
+        const t = c.tagName;
+        if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+        text += (c.textContent || '').trim().length;
+        media += c.querySelectorAll(MEDIA).length + (c.matches(MEDIA) ? 1 : 0);
+      }
+      return text + media * 100;
+    };
+    // "Non-zero and stable" alone is not sufficient to mean rendered: generic
+    // body can carry a static shell while async main content is pending, and
+    // #dc-root can carry the root DC's static text while child refs are still
+    // .sc-placeholder boxes. Gate generic on readyState 'complete', and never
+    // accept stability while a dc-runtime placeholder is present.
+    const isGeneric = settleRoot === document.body;
+    const deadline = Date.now() + 15000;
+    let last = -1, stable = 0;
+    while (Date.now() < deadline) {
+      const n = weigh();
+      const ready =
+        (!isGeneric || document.readyState === 'complete') &&
+        !settleRoot.querySelector('.sc-placeholder');
+      if (n > 0 && n === last && ready) { if (++stable >= 2) break; } else { stable = 0; }
+      last = n;
+      await new Promise((r) => setTimeout(r, 250));
+    }
+  }
+  // Project support.js may predate runtime default-seeding; push via bridge.
+  if (isDc && window.__dcSetProps && window.__dcRootName) {
+    try {
+      const dpEl = document.querySelector('script[data-dc-script]');
+      const meta = JSON.parse((dpEl && dpEl.getAttribute('data-props')) || '{}');
+      const bag = {};
+      for (const k in meta)
+        if (k[0] !== '$' && meta[k] && meta[k].default !== undefined)
+          bag[k] = meta[k].default;
+      if (Object.keys(bag).length) {
+        window.__dcSetProps(window.__dcRootName(), bag);
+        await new Promise((r) => setTimeout(r, 50));
+      }
+    } catch (e) {}
+  }
+  // Reveal content gated on scroll or visibility before printing. Lazy <img>,
+  // IntersectionObserver fade-ins, and collapsed <details> don't render while
+  // off-screen, so a long page would print with them blank or closed. Open
+  // every <details>, force native-lazy images eager, and scroll the document
+  // through its full height to trip lazy-load + IO; then wait (bounded) for the
+  // newly-triggered images. Inert for deck-stage (slides aren't scroll-gated).
+  try {
+    for (const d of document.querySelectorAll('details')) d.open = true;
+    for (const img of document.querySelectorAll('img[loading="lazy"]'))
+      img.loading = 'eager';
+    const scroller = document.scrollingElement || document.documentElement;
+    const full = Math.max(scroller.scrollHeight, document.body.scrollHeight);
+    const step = window.innerHeight || 800;
+    for (let y = 0; y <= full; y += step) {
+      window.scrollTo(0, y);
+      await new Promise((r) => requestAnimationFrame(r));
+    }
+    window.scrollTo(0, 0);
+    await Promise.race([
+      Promise.all(
+        [...document.images].map((img) =>
+          img.complete
+            ? null
+            : new Promise((res) => {
+                img.addEventListener('load', res, { once: true });
+                img.addEventListener('error', res, { once: true });
+              })
+        )
+      ),
+      new Promise((r) => setTimeout(r, 4000)),
+    ]);
+  } catch (e) {}
+  try { await document.fonts.ready; } catch (e) {}
+  // Jump every animation to its end state so print() never captures a slide
+  // mid-entrance. Ordering matters: the 0s-transition style must be live
+  // BEFORE data-deck-active is set so attribute-keyed transitions don't
+  // start a (now-0s) run from the pre-active base.
+  const st = document.createElement('style');
+  st.textContent = '*,*::before,*::after{animation-delay:-99s !important;animation-duration:.001s !important;animation-iteration-count:1 !important;animation-fill-mode:both !important;animation-play-state:running !important;transition-duration:0s !important}';
+  document.head.appendChild(st);
+  for (const d of document.querySelectorAll('deck-stage')) {
+    for (const c of d.children) {
+      const t = c.tagName;
+      if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+      c.setAttribute('data-deck-active', '');
+    }
+  }
+  // Re-append deck-stage's @page last so no author @page can add a margin and
+  // spill each full-bleed slide onto two sheets. Backstop for old copies.
+  if (ds) {
+    let pg = document.getElementById('deck-stage-print-page');
+    if (!pg) {
+      pg = document.createElement('style');
+      pg.textContent = '@page{size:' + (+ds.getAttribute('width') || 1920) +
+        'px ' + (+ds.getAttribute('height') || 1080) + 'px;margin:0}';
+    }
+    document.body.appendChild(pg);
+  }
+  try {
+    const sweep = () => {
+      for (const a of document.getAnimations()) {
+        try { a.finish(); } catch (e) {
+          try { a.currentTime = (a.effect && a.effect.getComputedTiming().duration) || 0; a.pause(); } catch (e2) {}
+        }
+      }
+    };
+    sweep();
+    await new Promise((r) => requestAnimationFrame(r));
+    sweep();
+    await new Promise((r) => requestAnimationFrame(r));
+  } catch (e) {}
+  // Size the PDF page to the rendered design unless the file opted into
+  // standard paper via @page{size:letter|A4|…}. Decks own their own @page.
+  // Wrappers (body, …) lose padding+margin so the frame sits at (0,0); the
+  // frame itself loses only margin — its padding is INSIDE the measured
+  // rect and must stay, or content shifts and leaves a gap at bottom/right.
+  var __m = null;
+  try { __m = (() => {
+  var docEl = document.documentElement;
+  var doc = { width: docEl.scrollWidth, height: docEl.scrollHeight };
+
+  var ds = document.querySelector('deck-stage');
+  if (ds) {
+    var dw = Number(ds.getAttribute('width')) || 1920;
+    var dh = Number(ds.getAttribute('height')) || 1080;
+    var n = typeof ds.length === 'number' ? ds.length : ds.children.length;
+    var idx = typeof ds.index === 'number' ? ds.index : 0;
+    var frames = [];
+    for (var i = 0; i < n; i++) frames.push({ left: 0, top: 0, width: dw, height: dh });
+    return { kind: 'deck', doc: doc, frames: frames,
+      authored: frames.map(function(){return{width:true,height:true}}),
+      deck: { width: dw, height: dh, slideCount: n, index: idx },
+      signals: { paperPage: false, pxPage: false } };
+  }
+
+  var paperPage = false, pxPage = false;
+  var eachRule = function (fn) {
+    for (var s = 0; s < document.styleSheets.length; s++) {
+      var rs; try { rs = document.styleSheets[s].cssRules; } catch (e) { continue; }
+      for (var r = 0; r < rs.length; r++) {
+        fn(rs[r]);
+        if (rs[r].cssRules) for (var n = 0; n < rs[r].cssRules.length; n++) fn(rs[r].cssRules[n]);
+      }
+    }
+  };
+  eachRule(function (r) {
+    if (r.type !== 6) return;
+    var m = /\bsize\s*:\s*([^;}]+)/i.exec(r.cssText || '');
+    if (!m) return;
+    if (/\b(letter|a[3-5]|legal|ledger)\b/i.test(m[1])) paperPage = true;
+    if (/\d+(?:\.\d+)?px\b/i.test(m[1])) pxPage = true;
+  });
+  var signals = { paperPage: paperPage, pxPage: pxPage };
+
+  var pxVal = function (v) {
+    var m = /^(\d+(?:\.\d+)?)px$/.exec(v || ''); return m ? +m[1] : 0;
+  };
+  var authoredPx = function (el, prop) {
+    if (pxVal(el.style[prop])) return true;
+    var attr = el.getAttribute(prop);
+    if (attr && /^\d+$/.test(attr)) return true;
+    var hit = false;
+    eachRule(function (r) {
+      if (hit || r.type !== 1 || !r.style) return;
+      try { if (el.matches(r.selectorText) && pxVal(r.style[prop])) hit = true; } catch (e) {}
+    });
+    return hit;
+  };
+
+  var el = document.body, rootPxW = false;
+  for (;;) {
+    var kids = [];
+    for (var c = 0; c < el.children.length; c++) {
+      var t = el.children[c].tagName;
+      if (t !== 'SCRIPT' && t !== 'STYLE' && t !== 'TEMPLATE') kids.push(el.children[c]);
+    }
+    if (kids.length !== 1 || !(kids[0] instanceof HTMLElement)) break;
+    el.setAttribute('data-om-frame-wrap', '');
+    el = kids[0];
+    rootPxW = authoredPx(el, 'width');
+    if (rootPxW) break;
+  }
+  if (!rootPxW) rootPxW = authoredPx(el, 'width');
+
+  // @page{size:letter} alone is a flowing doc; with a px-width root it's a
+  // fixed sheet pretending to be paper — fall through and size to render.
+  if (paperPage && !rootPxW) {
+    return { kind: 'paper-doc', doc: doc, signals: signals,
+      frames: [{ left: 0, top: 0, width: doc.width, height: doc.height }],
+      authored: [{ width: false, height: false }] };
+  }
+
+  var sx = window.scrollX || 0, sy = window.scrollY || 0;
+  var rectOf = function (e) {
+    var r = e.getBoundingClientRect();
+    var oy; try { oy = getComputedStyle(e).overflowY; } catch (err) {}
+    var h = oy === 'visible' ? Math.max(r.height, e.scrollHeight || 0) : r.height;
+    return { left: r.left + sx, top: r.top + sy, width: r.width, height: h };
+  };
+
+  // Multi-frame: ≥2 visible non-fixed children, each with authored px width
+  // AND height, all within ±2px of each other. Off unless the page opts in
+  // via data-om-multi-frame on the stop element — guards against card grids
+  // and pricing tables that match the geometry but aren't separate canvases.
+  if (el.hasAttribute('data-om-multi-frame')) {
+    var cands = [];
+    for (var k = 0; k < el.children.length; k++) {
+      var ch = el.children[k];
+      var cs; try { cs = getComputedStyle(ch); } catch (e) { continue; }
+      if (cs.display === 'none' || cs.visibility === 'hidden' || cs.position === 'fixed') continue;
+      var rc = rectOf(ch);
+      if (rc.width < 2 || rc.height < 2) continue;
+      if (!authoredPx(ch, 'width') || !authoredPx(ch, 'height')) continue;
+      cands.push(rc);
+    }
+    if (cands.length >= 2) {
+      var w0 = cands[0].width, h0 = cands[0].height, ok = true;
+      for (var q = 1; q < cands.length; q++)
+        if (Math.abs(cands[q].width - w0) > 2 || Math.abs(cands[q].height - h0) > 2) ok = false;
+      if (ok) return { kind: 'multi-frame', doc: doc, signals: signals,
+        frames: cands, authored: cands.map(function(){return{width:true,height:true}}) };
+    }
+  }
+
+  el.setAttribute('data-om-frame', '');
+  return { kind: 'single-canvas', doc: doc, signals: signals,
+    frames: [rectOf(el)],
+    authored: [{ width: rootPxW, height: authoredPx(el, 'height') }] };
+})(); } catch (e) {}
+  var frame = null;
+  if (__m && __m.kind === 'single-canvas') {
+    var f = __m.frames && __m.frames[0];
+    if (f && f.width >= 200 && f.height >= 200) {
+      frame = f;
+      var fst = document.createElement('style');
+      fst.textContent = '@media print{@page{size:' + Math.ceil(f.width) + 'px ' +
+        Math.ceil(f.height) + 'px;margin:0}' +
+        'html,body,[data-om-frame-wrap]{padding:0!important;margin:0!important;background:none!important}' +
+        '[data-om-frame]{margin:0!important}}';
+      document.body.appendChild(fst);
+    }
+  }
+  // Relax break-inside on oversized elements. An element taller than a
+  // printable page can't honor break-inside: avoid — browsers either overflow
+  // it or push it whole to the next page, leaving a blank gap, then break it
+  // anyway at an arbitrary point. After the final layout (content revealed,
+  // animations jumped), find elements taller than a page that still compute
+  // break-inside: avoid and reset them to auto, so the browser breaks them at
+  // their children's boundaries instead (children keep their own avoid). PAGE_PX
+  // is a conservative portrait estimate at 96 CSS px/in — Letter/A4 usable
+  // height minus our 0.5in margins — so only clearly-oversized elements are
+  // touched and under-page elements still stay whole. Skipped for decks (slides
+  // are sized to the page) and for fixed-size canvases (frame set, or an author
+  // px-based @page) — runs as before for flowing docs on letter/A4.
+  try {
+    if (!ds && !frame && !(__m && __m.signals && __m.signals.pxPage)) {
+      const PAGE_PX = 1024;
+      // Our print defaults add a real @page margin only when the source has
+      // no @page of its own; computed style can't tell us (it reports screen
+      // media), so read the injected rule directly.
+      const defaults = document.querySelector('style[data-omelette-print-defaults]');
+      const pageInset = /@page\s*\{[^}]*margin/.test(defaults ? defaults.textContent || '' : '');
+      const SEL = 'section,article,figure,table,pre,blockquote,[class~="card" i],[class~="page" i],[class~="sheet" i]';
+      for (const el of document.body.querySelectorAll(SEL)) {
+        if (el instanceof HTMLElement && el.offsetHeight > PAGE_PX) {
+          el.setAttribute('data-om-oversized', '');
+          // Fake-paged docs simulate sheets with over-tall break-after:page
+          // boxes; honoring the break spills half-blank pages and ends a
+          // colored box mid-sheet. Flow them, and (only when we own the page
+          // inset) drop the redundant padding/background via the rule below.
+          const cs = getComputedStyle(el);
+          if (cs.breakAfter === 'page' || cs.pageBreakAfter === 'always') {
+            el.setAttribute('data-om-fakepage', '');
+          }
+        }
+      }
+      const ost = document.createElement('style');
+      ost.textContent = '@media print{' +
+        '[data-om-oversized]{break-inside:auto !important;page-break-inside:auto !important}' +
+        '[data-om-fakepage]{break-after:auto !important;page-break-after:auto !important}' +
+        (pageInset ? '[data-om-fakepage]{padding:0 !important;background:none !important}' : '') +
+        '}';
+      document.head.appendChild(ost);
+    }
+  } catch (e) {}
+  // macOS Preview renders Skia-PDF Luminosity soft-masks as opaque grey boxes;
+  // swap the CSS that triggers them for Preview-safe forms.
+  try {
+    for (const el of document.body.querySelectorAll('*')) {
+      const cs = getComputedStyle(el);
+
+      if (cs.boxShadow !== 'none' && cs.filter === 'none') {
+        const outs = [], kept = [];
+        for (const s of cs.boxShadow.split(/,(?![^(]*[)])/)) {
+          const t = s.trim();
+          const m = t.match(/^(rgba?[(][^)]+[)]) (-?[0-9.]+px) (-?[0-9.]+px) ([0-9.]+px) -?[0-9.]+px$/);
+          if (m && parseFloat(m[4]) > 0) outs.push('drop-shadow(' + m[2] + ' ' + m[3] + ' ' + m[4] + ' ' + m[1] + ')');
+          else kept.push(t);
+        }
+        if (outs.length) {
+          el.style.setProperty('filter', outs.join(' '), 'important');
+          el.style.setProperty('box-shadow', kept.join(', ') || 'none', 'important');
+        }
+      }
+
+      const mask = cs.maskImage && cs.maskImage !== 'none' ? cs.maskImage : cs.webkitMaskImage;
+      if (mask && mask !== 'none' && cs.filter === 'none') el.style.setProperty('filter', 'opacity(1)', 'important');
+    }
+  } catch (e) {}
+  setTimeout(() => { try { window.print(); } catch (e) {} }, 200);
+})();
+</script>
+</body>
+</html>

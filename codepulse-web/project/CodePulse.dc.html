@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  ::selection { background: rgba(255,56,92,0.16); }
+  input { font-family: 'JetBrains Mono', monospace; }
+  input::placeholder { color: #c1c1c1; }
+  @keyframes cp-spin { to { transform: rotate(360deg); } }
+  @keyframes cp-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes cp-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+</style>
+</helmet>
+<div style="min-height:100vh; background:#ffffff; color:#222222; font-family:'Inter',-apple-system,system-ui,sans-serif; -webkit-font-smoothing:antialiased;">
+
+  <header style="position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between; height:64px; padding:0 28px; background:rgba(255,255,255,0.92); backdrop-filter:saturate(180%) blur(8px); border-bottom:1px solid #ebebeb;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div style="width:13px; height:13px; border-radius:9999px; background:{{ brand }};"></div>
+      <span style="font-size:17px; font-weight:700; letter-spacing:-0.4px;">CodePulse</span>
+      <span style="font-size:13px; color:#929292; font-weight:500; margin-left:2px;">· 내 코드에 맞는 AI 트렌드 매칭</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:18px;">
+      <span style="font-size:13px; color:#6a6a6a; font-weight:500;">2026. 06. 28 기준</span>
+      <span style="font-size:14px; color:#222222; font-weight:600; border-bottom:1.5px solid #222222; padding-bottom:1px; cursor:pointer;">작동 방식</span>
+    </div>
+  </header>
+
+  <main style="max-width:1000px; margin:0 auto;">
+
+    <!-- ============ INPUT ============ -->
+    <sc-if value="{{ isInput }}" hint-placeholder-val="{{ true }}">
+    <section style="padding:76px 28px 88px;">
+      <div style="display:inline-flex; align-items:center; gap:8px; padding:7px 14px; border:1px solid #ebebeb; border-radius:9999px; background:#f7f7f7; font-size:13px; font-weight:600; color:#6a6a6a; margin-bottom:24px;">
+        <span style="width:7px; height:7px; border-radius:9999px; background:{{ brand }};"></span>
+        GitHub 레포 × 오늘의 AI 트렌드
+      </div>
+      <h1 style="margin:0; font-size:44px; line-height:1.12; font-weight:600; letter-spacing:-1.4px; max-width:760px; text-wrap:balance;">내 코드에 의미 있는 AI 트렌드만, 오늘 단위로.</h1>
+      <p style="margin:20px 0 0; font-size:17px; line-height:1.6; color:#6a6a6a; max-width:600px;">레포 주소만 넣으면 오늘 나온 트렌드 중 당신의 코드와 맞닿은 것만 골라 <b style="color:#3f3f3f; font-weight:600;">대체후보 · 신규적용 · 영향</b>으로 분류해 드려요.</p>
+
+      <!-- pill bar -->
+      <div style="display:flex; align-items:center; gap:0; max-width:780px; margin-top:36px; background:#ffffff; border:1px solid #dddddd; border-radius:9999px; box-shadow:rgba(0,0,0,0.02) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px 0, rgba(0,0,0,0.1) 0 4px 10px 0; padding:6px 6px 6px 0;">
+        <label style="flex:1.5; display:block; padding:11px 26px; cursor:text;">
+          <div style="font-size:12px; font-weight:700; color:#222222; letter-spacing:0.1px; margin-bottom:3px;">GitHub 레포</div>
+          <input value="{{ repoUrl }}" onChange="{{ updateRepo }}" placeholder="github.com/your-org/your-repo" style="width:100%; border:none; outline:none; background:transparent; font-size:14.5px; color:#222222; padding:0;">
+        </label>
+        <div style="width:1px; height:38px; background:#dddddd;"></div>
+        <label style="flex:1; display:block; padding:11px 26px; cursor:text;">
+          <div style="font-size:12px; font-weight:700; color:#222222; letter-spacing:0.1px; margin-bottom:3px;">Gemini API 키</div>
+          <input value="{{ apiKey }}" onChange="{{ updateKey }}" placeholder="AIza…" style="width:100%; border:none; outline:none; background:transparent; font-size:14.5px; color:#222222; padding:0;">
+        </label>
+        <button onClick="{{ onAnalyze }}" aria-label="분석" style="flex:none; width:54px; height:54px; margin-left:6px; border:none; border-radius:9999px; background:{{ brand }}; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><line x1="16.5" y1="16.5" x2="21" y2="21" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:18px; margin-top:18px; flex-wrap:wrap;">
+        <span onClick="{{ fillSample }}" style="font-size:13px; font-weight:600; color:#222222; border-bottom:1.5px solid #222222; padding-bottom:1px; cursor:pointer;">예시 레포로 채우기</span>
+        <span style="font-size:12px; color:#929292;">키는 브라우저에서만 쓰이고 저장되지 않아요.</span>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:10px; margin-top:30px;">
+        <span style="font-size:12.5px; color:#929292; font-weight:600; letter-spacing:0.2px;">분석에 쓰는 공개 트렌드 소스</span>
+        <div style="height:1px; flex:1; max-width:40px; background:#ebebeb;"></div>
+        <div style="display:flex; gap:8px;">
+          <span style="font-size:12.5px; font-weight:600; color:#3f3f3f; background:#f7f7f7; border:1px solid #ebebeb; border-radius:9999px; padding:5px 12px;">arXiv</span>
+          <span style="font-size:12.5px; font-weight:600; color:#3f3f3f; background:#f7f7f7; border:1px solid #ebebeb; border-radius:9999px; padding:5px 12px;">Hacker News</span>
+          <span style="font-size:12.5px; font-weight:600; color:#3f3f3f; background:#f7f7f7; border:1px solid #ebebeb; border-radius:9999px; padding:5px 12px;">GitHub Trending</span>
+        </div>
+      </div>
+
+      <!-- taxonomy preview -->
+      <div style="margin-top:64px;">
+        <div style="font-size:13px; font-weight:700; color:#929292; letter-spacing:0.3px; text-transform:uppercase; margin-bottom:18px;">이렇게 분류해 드려요</div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+          <div style="border:1px solid #ebebeb; border-radius:16px; padding:22px;">
+            <div style="display:inline-flex; align-items:center; gap:7px; padding:5px 11px; border-radius:9999px; background:#ffeef2; color:#e00b41; font-size:12.5px; font-weight:700;"><span style="width:7px;height:7px;border-radius:9999px;background:#e00b41;"></span>대체후보</div>
+            <p style="margin:14px 0 0; font-size:14.5px; line-height:1.55; color:#3f3f3f;">지금 코드가 쓰는 기술을 더 나은 최신 것으로 <b style="font-weight:600;">바꿀</b> 후보.</p>
+          </div>
+          <div style="border:1px solid #ebebeb; border-radius:16px; padding:22px;">
+            <div style="display:inline-flex; align-items:center; gap:7px; padding:5px 11px; border-radius:9999px; background:#f1eaf8; color:#460479; font-size:12.5px; font-weight:700;"><span style="width:7px;height:7px;border-radius:9999px;background:#460479;"></span>신규적용</div>
+            <p style="margin:14px 0 0; font-size:14.5px; line-height:1.55; color:#3f3f3f;">아직 안 쓰지만 코드에 <b style="font-weight:600;">새로 붙이면</b> 좋을 기법.</p>
+          </div>
+          <div style="border:1px solid #ebebeb; border-radius:16px; padding:22px;">
+            <div style="display:inline-flex; align-items:center; gap:7px; padding:5px 11px; border-radius:9999px; background:#fbe7f0; color:#92174d; font-size:12.5px; font-weight:700;"><span style="width:7px;height:7px;border-radius:9999px;background:#92174d;"></span>영향</div>
+            <p style="margin:14px 0 0; font-size:14.5px; line-height:1.55; color:#3f3f3f;">의존성·릴리스 변화가 코드에 <b style="font-weight:600;">미칠</b> 파장.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    </sc-if>
+
+    <!-- ============ ANALYZING ============ -->
+    <sc-if value="{{ isAnalyzing }}">
+    <section style="padding:96px 28px; display:flex; flex-direction:column; align-items:center;">
+      <div style="display:inline-flex; align-items:center; gap:9px; padding:8px 16px; border-radius:9999px; background:#f7f7f7; border:1px solid #ebebeb; margin-bottom:36px;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:13.5px; font-weight:600; color:#222222; white-space:nowrap;">{{ repoDisplay }}</span>
+        <span style="font-size:13px; color:#6a6a6a; white-space:nowrap;">분석 중…</span>
+      </div>
+      <div style="width:100%; max-width:560px; display:flex; flex-direction:column; gap:6px;">
+        <sc-for list="{{ steps }}" as="step" hint-placeholder-count="4">
+          <div style="display:flex; align-items:center; gap:16px; padding:16px 4px;">
+            <div style="flex:none; width:34px; height:34px; border-radius:9999px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; background:{{ step.dotBg }}; color:{{ step.dotColor }}; border:1px solid {{ step.dotBorder }};">{{ step.n }}</div>
+            <div style="flex:1;">
+              <div style="font-size:15.5px; font-weight:600; color:{{ step.labelColor }};">{{ step.label }}</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:12.5px; color:#929292; margin-top:2px;">{{ step.sub }}</div>
+            </div>
+            <sc-if value="{{ step.isActive }}">
+              <div style="flex:none; width:18px; height:18px; border-radius:9999px; border:2px solid #ffe1e8; border-top-color:{{ brand }}; animation:cp-spin 0.7s linear infinite;"></div>
+            </sc-if>
+            <sc-if value="{{ step.isDone }}">
+              <span style="flex:none; font-size:13px; font-weight:600; color:#428bff;">완료</span>
+            </sc-if>
+            <sc-if value="{{ step.isIdle }}">
+              <span style="flex:none; font-size:13px; font-weight:500; color:#c1c1c1;">대기</span>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+      <p style="margin:40px 0 0; font-size:13px; color:#929292;">공개 트렌드 API와 입력하신 Gemini 키로 처리됩니다.</p>
+    </section>
+    </sc-if>
+
+    <!-- ============ RESULTS ============ -->
+    <sc-if value="{{ isResults }}">
+    <section style="padding:44px 28px 96px;">
+      <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap;">
+        <div>
+          <div style="font-size:12.5px; font-weight:700; color:#428bff; letter-spacing:0.3px; text-transform:uppercase; margin-bottom:8px;">분석 완료</div>
+          <h2 style="margin:0; font-family:'JetBrains Mono',monospace; font-size:24px; font-weight:600; letter-spacing:-0.5px;">{{ repoDisplay }}</h2>
+          <div style="font-size:13.5px; color:#929292; margin-top:6px;">2026. 06. 28 트렌드 기준 분석</div>
+        </div>
+        <button onClick="{{ onReset }}" style="flex:none; height:46px; padding:0 20px; border:1px solid #222222; border-radius:8px; background:#ffffff; color:#222222; font-size:15px; font-weight:600; cursor:pointer; white-space:nowrap;">다시 분석</button>
+      </div>
+
+      <div style="margin-top:26px; padding:22px 24px; background:#f7f7f7; border-radius:16px; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;">
+        <div style="font-size:16px; color:#222222; line-height:1.5;">오늘 수집한 트렌드 <b style="font-weight:700;">142개</b> 중 <b style="font-weight:700; color:{{ brand }};">8개</b>가 이 레포와 맞닿아 있어요.</div>
+        <div style="display:flex; gap:18px;">
+          <div style="display:flex; align-items:center; gap:7px; font-size:14px; font-weight:600; color:#3f3f3f;"><span style="width:8px;height:8px;border-radius:9999px;background:#e00b41;"></span>대체후보 3</div>
+          <div style="display:flex; align-items:center; gap:7px; font-size:14px; font-weight:600; color:#3f3f3f;"><span style="width:8px;height:8px;border-radius:9999px;background:#460479;"></span>신규적용 3</div>
+          <div style="display:flex; align-items:center; gap:7px; font-size:14px; font-weight:600; color:#3f3f3f;"><span style="width:8px;height:8px;border-radius:9999px;background:#92174d;"></span>영향 2</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:26px; flex-wrap:wrap;">
+        <sc-for list="{{ filters }}" as="f" hint-placeholder-count="4">
+          <button onClick="{{ f.onClick }}" style="height:40px; padding:0 18px; border-radius:9999px; border:1px solid {{ f.border }}; background:{{ f.bg }}; color:{{ f.color }}; font-size:14px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:7px; white-space:nowrap;">
+            {{ f.label }}<span style="opacity:0.55; font-weight:500;">{{ f.count }}</span>
+          </button>
+        </sc-for>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:14px; margin-top:22px;">
+        <sc-for list="{{ cards }}" as="c" hint-placeholder-count="5">
+          <div style="border:1px solid #ebebeb; border-radius:18px; background:#ffffff; padding:24px 26px; animation:cp-fade 0.35s ease both;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="display:inline-flex; align-items:center; gap:7px; padding:5px 12px; border-radius:9999px; background:{{ c.tint }}; color:{{ c.accent }}; font-size:12.5px; font-weight:700;"><span style="width:7px;height:7px;border-radius:9999px;background:{{ c.accent }};"></span>{{ c.catLabel }}</span>
+              <span style="font-size:12.5px; font-weight:600; color:#6a6a6a; background:#f7f7f7; border-radius:6px; padding:4px 9px;">{{ c.source }}</span>
+              <span style="font-size:13px; color:#929292;">{{ c.date }}</span>
+              <div style="margin-left:auto; display:flex; align-items:center; gap:9px;">
+                <span style="font-size:11.5px; font-weight:700; color:#929292; letter-spacing:0.1px;">관련도</span>
+                <div style="width:56px; height:5px; border-radius:9999px; background:#ebebeb; overflow:hidden;">
+                  <div style="width:{{ c.score }}%; height:100%; background:{{ c.accent }}; border-radius:9999px;"></div>
+                </div>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:13.5px; font-weight:600; color:#222222; min-width:22px; text-align:right;">{{ c.score }}</span>
+              </div>
+              <button onClick="{{ c.onToggle }}" style="border:none; background:transparent; cursor:pointer; font-size:13.5px; font-weight:600; color:#6a6a6a; white-space:nowrap;">
+                <sc-if value="{{ c.open }}">접기 ↑</sc-if>
+                <sc-if value="{{ c.closed }}">자세히 ↓</sc-if>
+              </button>
+            </div>
+
+            <h3 style="margin:15px 0 0; font-size:19px; font-weight:600; letter-spacing:-0.4px; color:#222222;">{{ c.title }}</h3>
+            <p style="margin:8px 0 0; font-size:15px; line-height:1.55; color:#3f3f3f; max-width:760px;">{{ c.reason }}</p>
+
+            <div style="display:inline-flex; align-items:center; gap:8px; margin-top:16px; padding:7px 12px; background:#f7f7f7; border:1px solid #ebebeb; border-radius:8px;">
+              <span style="font-size:11.5px; font-weight:700; color:#929292; letter-spacing:0.2px;">관련 파일</span>
+              <span style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:#222222;">{{ c.file }}</span>
+            </div>
+
+            <sc-if value="{{ c.open }}">
+              <div style="margin-top:22px; padding-top:22px; border-top:1px solid #ebebeb;">
+                <p style="margin:0; font-size:15px; line-height:1.65; color:#3f3f3f; max-width:760px;">{{ c.detail }}</p>
+                <div style="margin-top:20px; display:flex; align-items:flex-start; gap:12px;">
+                  <span style="flex:none; font-size:11.5px; font-weight:700; color:{{ c.accent }}; background:{{ c.tint }}; border-radius:6px; padding:5px 10px; letter-spacing:0.2px;">추천 액션</span>
+                  <span style="font-size:15px; font-weight:600; color:#222222; line-height:1.5;">{{ c.action }}</span>
+                </div>
+                <div style="margin-top:20px;">
+                  <span style="display:inline-flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:#222222; border:1px solid #dddddd; border-radius:9999px; padding:8px 15px; cursor:pointer;">{{ c.link }} ↗</span>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+    </sc-if>
+
+  </main>
+</div>
+
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#fff0f3"/>
+  <circle cx="100" cy="100" r="34" fill="#ff385c"/>
+  <path d="M44 100 H72 L82 74 L100 130 L118 88 L126 100 H156" fill="none" stroke="#222222" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+</template></x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;brandColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#ff385c&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#ff385c&quot;,&quot;#6d28a8&quot;,&quot;#0f7a6b&quot;,&quot;#222222&quot;],&quot;section&quot;:&quot;Brand&quot;}}">
+class Component extends DCLogic {
+  state = { view: 'input', repoUrl: '', apiKey: '', stepIndex: -1, filter: 'all', openId: 't1' };
+
+  CATS = {
+    replace: { label: '대체후보', accent: '#e00b41', tint: '#ffeef2' },
+    apply:   { label: '신규적용', accent: '#460479', tint: '#f1eaf8' },
+    impact:  { label: '영향',     accent: '#92174d', tint: '#fbe7f0' },
+  };
+
+  STEPS = [
+    { n: '1', label: '레포 클론',            sub: 'git clone' },
+    { n: '2', label: '트렌드 수집',          sub: 'arXiv · Hacker News · GitHub' },
+    { n: '3', label: '코드 ↔ 트렌드 대조',   sub: 'Google Gemini' },
+    { n: '4', label: '분류 결과 생성',        sub: '대체후보 · 신규적용 · 영향' },
+  ];
+
+  DATA = [
+    { id:'t1', cat:'replace', title:'vLLM 0.9 — 연속 배칭', source:'GitHub Trending', date:'6월 27일',
+      reason:'지금 transformers.pipeline()로 요청을 순차 추론 중 — vLLM 연속 배칭이면 같은 GPU에서 처리량이 크게 올라요.',
+      file:'api/inference.py',
+      detail:'inference.py의 동기 추론 루프가 요청을 한 건씩 처리하고 있어 GPU 점유율이 낮습니다. vLLM의 continuous batching과 PagedAttention으로 바꾸면 같은 하드웨어에서 동시 처리량이 수 배 늘고, OpenAI 호환 서버로 띄우면 클라이언트 코드 변경도 거의 없습니다.',
+      action:'추론 서버를 vLLM OpenAI-compatible 엔드포인트로 교체',
+      link:'github.com/vllm-project/vllm' },
+    { id:'t2', cat:'replace', title:'BGE-M3 다국어 임베딩', source:'arXiv', date:'6월 26일',
+      reason:'ada-002로 한국어 문서를 임베딩 중 — BGE-M3가 다국어·롱컨텍스트 검색에서 더 좋은 회수율을 보여요.',
+      file:'lib/embeddings.ts',
+      detail:'embeddings.ts가 OpenAI text-embedding-ada-002를 호출합니다. 한국어가 섞인 사내 문서 검색에서는 BGE-M3가 회수율이 높고, 8192 토큰까지 한 번에 임베딩해 청크 경계 손실이 줄어듭니다. 자체 호스팅하면 임베딩 비용도 사라집니다.',
+      action:'임베딩 모델을 BGE-M3로 교체하고 벡터 차원 마이그레이션',
+      link:'huggingface.co/BAAI/bge-m3' },
+    { id:'t3', cat:'replace', title:'Qdrant 1.12 하이브리드 검색', source:'Hacker News', date:'6월 25일',
+      reason:'인메모리 코사인 검색을 쓰는데 — Qdrant 하이브리드(BM25+벡터)면 정확도와 영속성을 같이 얻어요.',
+      file:'lib/vectorstore.py',
+      detail:'vectorstore.py가 NumPy 배열로 코사인 유사도를 직접 계산합니다. 문서가 늘면 메모리와 지연이 같이 커지고 재시작 시 인덱스가 사라집니다. Qdrant 1.12의 하이브리드 검색으로 옮기면 키워드와 벡터를 함께 쓰고 디스크 영속성도 확보됩니다.',
+      action:'벡터 스토어를 Qdrant로 이전하고 하이브리드 쿼리 적용',
+      link:'github.com/qdrant/qdrant' },
+    { id:'t4', cat:'apply', title:'DSPy 2.6 — 프롬프트 컴파일', source:'arXiv', date:'6월 28일',
+      reason:'프롬프트를 텍스트 파일로 하드코딩 중 — DSPy로 예시 기반 자동 최적화를 붙일 수 있어요.',
+      file:'prompts/classify.txt',
+      detail:'classify.txt의 분류 프롬프트가 수작업으로 다듬어져 있습니다. DSPy 2.6으로 옮기면 라벨링된 예시로 프롬프트를 컴파일·최적화해 분류 일관성을 끌어올릴 수 있고, 모델을 교체해도 재컴파일만 하면 됩니다.',
+      action:'분류 단계를 DSPy 모듈로 감싸고 few-shot 컴파일 도입',
+      link:'github.com/stanfordnlp/dspy' },
+    { id:'t5', cat:'apply', title:'Structured Outputs (JSON Schema)', source:'GitHub', date:'6월 27일',
+      reason:'분류 결과 JSON을 정규식으로 파싱 중 — 스키마 강제 출력으로 파싱 실패를 없앨 수 있어요.',
+      file:'api/analyze/route.ts',
+      detail:'route.ts가 모델 응답에서 정규식으로 JSON을 긁어냅니다. 가끔 깨진 JSON으로 실패하죠. Gemini의 구조화 출력(responseSchema)으로 카테고리·근거 필드를 강제하면 파싱 단계를 통째로 제거할 수 있습니다.',
+      action:'responseSchema로 분류 출력 스키마를 고정',
+      link:'ai.google.dev/gemini-api/docs/structured-output' },
+    { id:'t6', cat:'apply', title:'시맨틱 캐싱 (GPTCache)', source:'Hacker News', date:'6월 24일',
+      reason:'비슷한 질의가 반복돼요 — 시맨틱 캐시를 두면 Gemini 호출 수와 비용이 줄어요.',
+      file:'lib/gemini.ts',
+      detail:'gemini.ts가 매 요청마다 모델을 호출합니다. 같은 레포를 짧은 간격으로 다시 분석하면 동일·유사 질의가 반복됩니다. GPTCache 같은 시맨틱 캐시를 앞단에 두면 임베딩 유사도로 캐시 히트를 잡아 호출량을 줄입니다.',
+      action:'Gemini 호출 앞단에 시맨틱 캐시 레이어 추가',
+      link:'github.com/zilliztech/GPTCache' },
+    { id:'t7', cat:'impact', title:'Next.js 15.3 — Turbopack 정식', source:'GitHub Release', date:'6월 26일',
+      reason:'지금 webpack으로 빌드 중 — Turbopack 정식 전환으로 빌드가 빨라지지만 설정 변경이 필요해요.',
+      file:'next.config.js',
+      detail:'next.config.js가 커스텀 webpack 설정에 의존합니다. 15.3에서 Turbopack이 정식이 되며 일부 로더·플러그인 설정을 옮겨야 합니다. 빌드와 HMR 속도는 크게 개선되지만 마이그레이션 점검이 필요합니다.',
+      action:'Turbopack 호환성 점검 후 빌드 파이프라인 전환',
+      link:'nextjs.org/blog' },
+    { id:'t8', cat:'impact', title:'LangChain 0.4 — 인터페이스 변경', source:'Hacker News', date:'6월 23일',
+      reason:'0.3 체인 API를 쓰는데 — 0.4에서 일부 인터페이스가 바뀌어 마이그레이션이 필요해요.',
+      file:'lib/chain.ts',
+      detail:'chain.ts가 LangChain 0.3의 체인 구성 API를 사용합니다. 0.4에서 일부 import 경로와 러너 인터페이스가 변경되어 그대로 업그레이드하면 빌드가 깨질 수 있습니다. 변경점을 확인하고 단계적으로 올리세요.',
+      action:'0.4 마이그레이션 가이드 기준으로 체인 코드 점검',
+      link:'github.com/langchain-ai/langchain' },
+  ];
+
+  startAnalyze = () => {
+    if (this._t) clearInterval(this._t);
+    this.setState({ view: 'analyzing', stepIndex: 0 });
+    this._t = setInterval(() => {
+      this.setState(s => {
+        const next = s.stepIndex + 1;
+        if (next >= this.STEPS.length) {
+          clearInterval(this._t);
+          return { view: 'results', stepIndex: this.STEPS.length };
+        }
+        return { stepIndex: next };
+      });
+    }, 850);
+  };
+
+  reset = () => {
+    if (this._t) clearInterval(this._t);
+    this.setState({ view: 'input', stepIndex: -1, openId: 't1', filter: 'all' });
+  };
+
+  fillSample = () => {
+    this.setState({ repoUrl: 'khuda-team4/rag-chat-service', apiKey: 'AIzaSyD-demo-key-7Q2x' });
+  };
+
+  componentWillUnmount() { if (this._t) clearInterval(this._t); }
+
+  renderVals() {
+    const s = this.state;
+    const brand = this.props.brandColor || '#ff385c';
+    const repoDisplay = (s.repoUrl || '').trim() || 'khuda-team4/rag-chat-service';
+    const count = k => this.DATA.filter(d => d.cat === k).length;
+
+    const filters = [
+      { key: 'all', label: '전체', count: this.DATA.length },
+      { key: 'replace', label: '대체후보', count: count('replace') },
+      { key: 'apply', label: '신규적용', count: count('apply') },
+      { key: 'impact', label: '영향', count: count('impact') },
+    ].map(f => {
+      const active = s.filter === f.key;
+      return { ...f, onClick: () => this.setState({ filter: f.key }),
+        bg: active ? '#222222' : '#ffffff',
+        color: active ? '#ffffff' : '#222222',
+        border: active ? '#222222' : '#dddddd' };
+    });
+
+    const SCORES = { t1: 94, t2: 88, t3: 82, t4: 79, t5: 91, t6: 73, t7: 68, t8: 76 };
+    const cards = this.DATA
+      .filter(d => s.filter === 'all' || d.cat === s.filter)
+      .map(d => {
+        const c = this.CATS[d.cat];
+        const open = s.openId === d.id;
+        return { ...d, catLabel: c.label, accent: c.accent, tint: c.tint,
+          score: SCORES[d.id], open, closed: !open,
+          onToggle: () => this.setState(st => ({ openId: st.openId === d.id ? null : d.id })) };
+      })
+      .sort((a, b) => b.score - a.score);
+
+    const steps = this.STEPS.map((st, i) => {
+      const status = i < s.stepIndex ? 'done' : (i === s.stepIndex ? 'active' : 'idle');
+      return { ...st,
+        isDone: status === 'done', isActive: status === 'active', isIdle: status === 'idle',
+        dotBg: status === 'idle' ? '#ffffff' : (status === 'done' ? '#428bff' : brand),
+        dotColor: status === 'idle' ? '#929292' : '#ffffff',
+        dotBorder: status === 'idle' ? '#dddddd' : 'transparent',
+        labelColor: status === 'idle' ? '#929292' : '#222222' };
+    });
+
+    return {
+      brand,
+      isInput: s.view === 'input', isAnalyzing: s.view === 'analyzing', isResults: s.view === 'results',
+      repoUrl: s.repoUrl, apiKey: s.apiKey,
+      updateRepo: e => this.setState({ repoUrl: e.target.value }),
+      updateKey: e => this.setState({ apiKey: e.target.value }),
+      onAnalyze: this.startAnalyze, onReset: this.reset, fillSample: this.fillSample,
+      repoDisplay, filters, cards, steps,
+    };
+  }
+}
+</script>
+</body>
+</html>
