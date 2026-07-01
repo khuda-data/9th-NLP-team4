@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Header from './components/Header';
 import InputView from './views/InputView';
@@ -6,10 +7,7 @@ import AnalyzingView from './views/AnalyzingView';
 import ResultsView from './views/ResultsView';
 import { FilterKey, STEPS } from './data';
 
-type View = 'input' | 'analyzing' | 'results';
-
 const SAMPLE_REPO = 'khuda-team4/rag-chat-service';
-const SAMPLE_KEY  = 'AIzaSyD-demo-key-7Q2x';
 
 const PageWrap = styled.div`
   min-height: 100vh;
@@ -23,8 +21,8 @@ const Main = styled.main`
   margin: 0 auto;
 `;
 
-export default function App() {
-  const [view, setView]           = useState<View>('input');
+function AppRoutes() {
+  const navigate = useNavigate();
   const [repoUrl, setRepoUrl]     = useState('');
   const [apiKey, setApiKey]       = useState('');
   const [stepIndex, setStepIndex] = useState(-1);
@@ -36,7 +34,7 @@ export default function App() {
 
   function startAnalyze() {
     if (timerRef.current) clearInterval(timerRef.current);
-    setView('analyzing');
+    navigate('/analyzing');
     setStepIndex(0);
 
     timerRef.current = setInterval(() => {
@@ -45,7 +43,7 @@ export default function App() {
         if (next >= STEPS.length) {
           clearInterval(timerRef.current!);
           timerRef.current = null;
-          setView('results');
+          navigate('/results');
         }
         return next;
       });
@@ -54,7 +52,7 @@ export default function App() {
 
   function reset() {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
-    setView('input');
+    navigate('/');
     setStepIndex(-1);
     setOpenId('t1');
     setFilter('all');
@@ -62,7 +60,6 @@ export default function App() {
 
   function fillSample() {
     setRepoUrl(SAMPLE_REPO);
-    setApiKey(SAMPLE_KEY);
   }
 
   function toggleCard(id: string) {
@@ -70,10 +67,10 @@ export default function App() {
   }
 
   return (
-    <PageWrap>
-      <Header />
-      <Main>
-        {view === 'input' && (
+    <Routes>
+      <Route
+        path="/"
+        element={
           <InputView
             repoUrl={repoUrl}
             apiKey={apiKey}
@@ -82,14 +79,15 @@ export default function App() {
             onAnalyze={startAnalyze}
             onFillSample={fillSample}
           />
-        )}
-        {view === 'analyzing' && (
-          <AnalyzingView
-            repoDisplay={repoDisplay}
-            stepIndex={stepIndex}
-          />
-        )}
-        {view === 'results' && (
+        }
+      />
+      <Route
+        path="/analyzing"
+        element={<AnalyzingView repoDisplay={repoDisplay} stepIndex={stepIndex} />}
+      />
+      <Route
+        path="/results"
+        element={
           <ResultsView
             repoDisplay={repoDisplay}
             filter={filter}
@@ -98,8 +96,21 @@ export default function App() {
             onToggleCard={toggleCard}
             onReset={reset}
           />
-        )}
-      </Main>
-    </PageWrap>
+        }
+      />
+    </Routes>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <PageWrap>
+        <Header />
+        <Main>
+          <AppRoutes />
+        </Main>
+      </PageWrap>
+    </BrowserRouter>
   );
 }

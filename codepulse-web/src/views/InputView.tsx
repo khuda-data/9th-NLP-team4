@@ -60,18 +60,6 @@ export default function InputView({
             spellCheck={false}
           />
         </FieldLabel>
-        <Divider />
-        <FieldLabel $flex={1}>
-          <InputLabel>Gemini API 키</InputLabel>
-          <SearchInput
-            value={apiKey}
-            onChange={e => onKeyChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="AIza…"
-            autoComplete="off"
-            spellCheck={false}
-          />
-        </FieldLabel>
         <SearchBtn onClick={onAnalyze} aria-label="분석">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <circle cx="11" cy="11" r="7" stroke="#fff" strokeWidth="2" />
