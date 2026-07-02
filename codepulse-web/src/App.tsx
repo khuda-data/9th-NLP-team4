@@ -32,23 +32,23 @@ function AppRoutes() {
 
   const repoDisplay = repoUrl.trim() || SAMPLE_REPO;
 
-  function startAnalyze() {
-    if (timerRef.current) clearInterval(timerRef.current);
-    navigate('/analyzing');
-    setStepIndex(0);
+  // function startAnalyze() {
+  //   if (timerRef.current) clearInterval(timerRef.current);
+  //   navigate('/analyzing');
+  //   setStepIndex(0);
 
-    timerRef.current = setInterval(() => {
-      setStepIndex(prev => {
-        const next = prev + 1;
-        if (next >= STEPS.length) {
-          clearInterval(timerRef.current!);
-          timerRef.current = null;
-          navigate('/results');
-        }
-        return next;
-      });
-    }, 850);
-  }
+  //   timerRef.current = setInterval(() => {
+  //     setStepIndex(prev => {
+  //       const next = prev + 1;
+  //       if (next >= STEPS.length) {
+  //         clearInterval(timerRef.current!);
+  //         timerRef.current = null;
+  //         navigate('/results');
+  //       }
+  //       return next;
+  //     });
+  //   }, 850);
+  // }
 
   function reset() {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
@@ -76,7 +76,6 @@ function AppRoutes() {
             apiKey={apiKey}
             onRepoChange={setRepoUrl}
             onKeyChange={setApiKey}
-            onAnalyze={startAnalyze}
             onFillSample={fillSample}
           />
         }

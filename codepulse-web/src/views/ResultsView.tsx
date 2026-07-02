@@ -4,7 +4,8 @@ import {
   Section, ResultsHeader, HeaderLeft, DoneLabel, RepoTitle, DateSub, ResetBtn,
   SummaryBar, SummaryText, Highlight, SummaryDots, DotItem, Dot, FilterRow, CardsList,
 } from '../components/ResultsView/ResultsView.styled';
-import { CATS, CatKey, DATA, FilterKey, SCORES } from '../data';
+import { CATS, CatKey, FilterKey } from '../data';
+import { useLocation } from 'react-router-dom';
 
 interface Props {
   repoDisplay: string;
@@ -20,6 +21,23 @@ interface FilterDef {
   label: string;
 }
 
+type cat = "replace" | "apply" | "impact";
+interface IResult {
+  id: string,
+  category: cat,
+  relevanceScore: number,
+  title: string,
+  source: {
+    name: string,
+      url: string,
+      publishedAt: string
+  },
+  reason: string,
+  relatedFile: string,
+  detail: string,
+  recommendedAction: string,
+}
+
 const FILTERS: FilterDef[] = [
   { key: 'all',     label: '전체' },
   { key: 'replace', label: '대체후보' },
@@ -28,41 +46,37 @@ const FILTERS: FilterDef[] = [
 ];
 
 export default function ResultsView({
-  repoDisplay, filter, openId, onFilterChange, onToggleCard, onReset,
+  filter, openId, onFilterChange, onToggleCard, onReset,
 }: Props) {
-  const counts: Record<FilterKey, number> = {
-    all:     DATA.length,
-    replace: DATA.filter(d => d.cat === 'replace').length,
-    apply:   DATA.filter(d => d.cat === 'apply').length,
-    impact:  DATA.filter(d => d.cat === 'impact').length,
-  };
+  const location = useLocation();
+  const result = location.state.result;
+  console.log(result);
 
-  const visibleCards = DATA
-    .filter(d => filter === 'all' || d.cat === filter)
-    .map(d => ({ ...d, score: SCORES[d.id] }))
-    .sort((a, b) => b.score - a.score);
+  const visibleCards = result["results"]
+    .filter((d:IResult) => filter === 'all' || d.category === filter)
+    .sort((a:any, b:any) => b.relevanceScore - a.relevanceScore);
 
   return (
     <Section>
       <ResultsHeader>
         <HeaderLeft>
           <DoneLabel>분석 완료</DoneLabel>
-          <RepoTitle>{repoDisplay}</RepoTitle>
-          <DateSub>2026. 06. 28 트렌드 기준 분석</DateSub>
+          <RepoTitle>{result["repoFullName"]}</RepoTitle>
+          <DateSub>{result["analyzedAt"].split("T")[0]} 트렌드 기준 분석</DateSub>
         </HeaderLeft>
         <ResetBtn onClick={onReset}>다시 분석</ResetBtn>
       </ResultsHeader>
 
       <SummaryBar>
         <SummaryText>
-          오늘 수집한 트렌드 <b>142개</b> 중{' '}
-          <Highlight>8개</Highlight>가 이 레포와 맞닿아 있어요.
+          오늘 수집한 트렌드 중{' '}
+          <Highlight>{result["results"].length}개</Highlight>가 이 레포와 맞닿아 있어요.
         </SummaryText>
         <SummaryDots>
           {(Object.entries(CATS) as [CatKey, typeof CATS[CatKey]][]).map(([key, cat]) => (
             <DotItem key={key}>
               <Dot $color={cat.accent} />
-              {cat.label} {counts[key]}
+              {cat.label} {result["results"].filter((res:IResult) => res["category"] == key).length}
             </DotItem>
           ))}
         </SummaryDots>
@@ -73,7 +87,7 @@ export default function ResultsView({
           <FilterButton
             key={f.key}
             label={f.label}
-            count={counts[f.key]}
+            count={f.key == 'all' ? result["results"].length :result["results"].filter((res:IResult) => res["category"] == f.key).length}
             active={filter === f.key}
             onClick={() => onFilterChange(f.key)}
           />
@@ -81,7 +95,7 @@ export default function ResultsView({
       </FilterRow>
 
       <CardsList>
-        {visibleCards.map((item, idx) => (
+        {visibleCards.map((item:any, idx:number) => (
           <TrendCard
             key={item.id}
             item={item}
