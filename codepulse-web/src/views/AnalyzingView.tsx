@@ -2,20 +2,67 @@ import StepItem from '../components/StepItem';
 import {
   Section, RepoChip, RepoName, RepoStatus, StepsList, Note,
 } from '../components/AnalyzingView/AnalyzingView.styled';
-import { STEPS, StepStatus } from '../data';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { analyze } from '../utils/analyze';
+import { STEPS } from '../data';
 
 interface Props {
   repoDisplay: string;
   stepIndex: number;
 }
 
-function getStatus(i: number, stepIndex: number): StepStatus {
-  if (i < stepIndex) return 'done';
-  if (i === stepIndex) return 'active';
-  return 'idle';
+type status = "active" | "done";
+interface IStepInfo {
+  status: status,
+  stepIndex: number,
 }
 
-export default function AnalyzingView({ repoDisplay, stepIndex }: Props) {
+export default function AnalyzingView({ repoDisplay }: Props) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [stepStatusByIndex, setStepStatusByIndex] = useState<Record<number, status>>({});
+  
+  useEffect(() => {
+    const handleAnalyze = async () => {
+      for await (const text of analyze(location.state.url)) {
+        const events = text.split("\n\n");
+        for(const event of events) {
+          const lines = event.split("\n");
+
+          let eventName = "";
+          let data = "";
+
+          for (const line of lines) {
+            if (line.startsWith("event:")) {
+              eventName = line.slice(6).trim();
+            }
+
+            if (line.startsWith("data:")) {
+              data = line.slice(5).trim();
+            }
+          }
+          if (data) {
+            const payload = JSON.parse(data);
+
+            console.log(eventName);
+            console.log(payload);
+            if(eventName == 'job_created') console.log(eventName, payload);
+            else if(eventName == 'step_update') {
+              const { stepIndex: idx, status }: IStepInfo = payload;
+              setStepStatusByIndex(prev => ({ ...prev, [idx]: status }));
+            }
+            else if(eventName == 'completed') {
+              console.log(eventName, payload);
+              navigate('/results', {state: {result: payload}});
+            }
+          }
+        }
+      }
+    }
+    handleAnalyze();
+  }, [])
+  
   return (
     <Section>
       <RepoChip>
@@ -30,7 +77,7 @@ export default function AnalyzingView({ repoDisplay, stepIndex }: Props) {
             n={step.n}
             label={step.label}
             sub={step.sub}
-            status={getStatus(i, stepIndex)}
+            status={stepStatusByIndex[i] ?? "idle"}
           />
         ))}
       </StepsList>

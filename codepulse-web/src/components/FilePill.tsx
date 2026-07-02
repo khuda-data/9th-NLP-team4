@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 interface Props {
-  file: string;
+  files: string[];
 }
 
 const Wrapper = styled.div`
@@ -29,11 +29,12 @@ const FileName = styled.span`
   color: #222222;
 `;
 
-export default function FilePill({ file }: Props) {
+export default function FilePill({ files }: Props) {
+  if (files.length === 0) return null;
   return (
     <Wrapper>
       <FileLabel>관련 파일</FileLabel>
-      <FileName>{file}</FileName>
+      <FileName>{files.join(', ')}</FileName>
     </Wrapper>
   );
 }

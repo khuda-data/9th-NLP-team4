@@ -2,7 +2,7 @@ import styled, { keyframes } from 'styled-components';
 import CategoryBadge from './CategoryBadge';
 import ScoreBar from './ScoreBar';
 import FilePill from './FilePill';
-import { CATS, SCORES, TrendItem } from '../data';
+import { CATS, TrendItem } from '../data';
 
 interface Props {
   item: TrendItem;
@@ -140,18 +140,17 @@ const LinkPill = styled.a`
 `;
 
 export default function TrendCard({ item, delay = 0, openId, onToggle }: Props) {
-  const cat = CATS[item.cat];
-  const score = SCORES[item.id];
+  const cat = CATS[item.category];
   const open = openId === item.id;
 
   return (
     <Card $delay={delay}>
       <CardHeader>
         <CategoryBadge label={cat.label} accent={cat.accent} tint={cat.tint} />
-        <SourceChip>{item.source}</SourceChip>
-        <DateText>{item.date}</DateText>
+        <SourceChip>{item.source.name}</SourceChip>
+        <DateText>{item.source.publishedAt}</DateText>
         <ScoreWrap>
-          <ScoreBar score={score} color={cat.accent} />
+          <ScoreBar score={item.relevanceScore} color={cat.accent} />
         </ScoreWrap>
         <ToggleBtn onClick={() => onToggle(item.id)}>
           {open ? '접기 ↑' : '자세히 ↓'}
@@ -160,21 +159,21 @@ export default function TrendCard({ item, delay = 0, openId, onToggle }: Props) 
 
       <Title>{item.title}</Title>
       <Reason>{item.reason}</Reason>
-      <FilePill file={item.file} />
+      <FilePill files={item.relatedFiles} />
 
       {open && (
         <Detail>
           <DetailText>{item.detail}</DetailText>
           <ActionRow>
             <ActionLabel $accent={cat.accent} $tint={cat.tint}>추천 액션</ActionLabel>
-            <ActionText>{item.action}</ActionText>
+            <ActionText>{item.recommendedAction}</ActionText>
           </ActionRow>
           <LinkPill
-            href={`https://${item.link}`}
+            href={item.source.url}
             target="_blank"
             rel="noopener noreferrer"
           >
-            {item.link} ↗
+            {item.source.url} ↗
           </LinkPill>
         </Detail>
       )}

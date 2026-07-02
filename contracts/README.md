@@ -57,3 +57,187 @@ JSON Schema(draft 2020-12)라서 `ajv` 등으로 examples가 스키마를 만족
 ```bash
 npx -y ajv-cli validate -s contracts/trend.schema.json -d "contracts/examples/trend.example.json" --spec=draft2020
 ```
+
+## api 명세
+### 1. `POST /analyze`
+레포 url을 전달하여 분석 진행 event와 status, 진행 결과를 전달받는 엔드포인트. fetch streaming 방식으로 서버로부터 데이터를 받는다.
+
+*body*
+```
+{
+    "repoUrl": string
+}
+```
+
+*response*
+아래 4종류의 이벤트가 순서대로 전송된다.
+
+1. job_created
+작업 생성
+```
+event: job_created
+data: {
+  "jobId": string,
+  "repoFullName": string,
+}
+```
+
+2. step_update
+단계 진행(총 8회 발생)
+```
+event: step_update
+data: {"stepIndex": 0, "status": "active"}
+
+event: step_update
+data: {"stepIndex": 0, "status": "done"}
+
+event: step_update
+data: {"stepIndex": 1, "status": "active"}
+
+event: step_update
+data: {"stepIndex": 1, "status": "done"}
+
+event: step_update
+data: {"stepIndex": 2, "status": "active"}
+
+event: step_update
+data: {"stepIndex": 2, "status": "done"}
+
+event: step_update
+data: {"stepIndex": 3, "status": "active"}
+
+event: step_update
+data: {"stepIndex": 3, "status": "done"}
+```
+- `stepIndex`들은 /analyzing 화면 내 `레포 클론/트렌드 수집/코드-트렌드 대조/분류 결과 생성` 단계에 대응된다.
+
+3. completed
+분석 완료(결과 전체 포함)
+```
+event: completed
+data: {
+  "jobId": "job_a1b2c3d4",
+  "repoFullName": "khuda-team4/rag-chat-service",
+  "analyzedAt": "2026-06-28T09:31:00Z",
+  "summary": {
+    "totalTrendsScanned": 142,
+    "matchedCount": 8,
+    "countByCategory": {
+      "replace": 3,
+      "apply": 3,
+      "impact": 2
+    }
+  },
+  "results": [
+    {
+      "id": "res_t1",
+      "category": "replace",
+      "relevanceScore": 94,
+      "title": "vLLM 0.9 — 연속 배칭",
+      "source": {
+        "name": "GitHub Trending",
+        "url": "https://github.com/vllm-project/vllm",
+        "publishedAt": "2026-06-27"
+      },
+      "reason": "지금 transformers.pipeline()로 요청을 순차 추론 중 — vLLM 연속 배칭이면 같은 GPU에서 처리량이 크게 올라요.",
+      "relatedFile": "api/inference.py",
+      "detail": "inference.py의 동기 추론 루프가 요청을 한 건씩 처리하고 있어 GPU 점유율이 낮습니다. vLLM의 continuous batching과 PagedAttention으로 바꾸면 같은 하드웨어에서 동시 처리량이 수 배 늘고, OpenAI 호환 서버로 띄우면 클라이언트 코드 변경도 거의 없습니다.",
+      "recommendedAction": "추론 서버를 vLLM OpenAI-compatible 엔드포인트로 교체"
+    },
+    {
+      "id": "res_t2",
+      "category": "apply",
+      "relevanceScore": 91,
+      "title": "Structured Outputs (JSON Schema)",
+      "source": {
+        "name": "GitHub",
+        "url": "https://github.com/google-gemini/cookbook",
+        "publishedAt": "2026-06-27"
+      },
+      "reason": "분류 결과 JSON을 정규식으로 파싱 중 — 스키마 강제 출력으로 파싱 실패를 없앨 수 있어요.",
+      "relatedFile": "api/analyze/route.ts",
+      "detail": "route.ts가 모델 응답에서 정규식으로 JSON을 긁어냅니다. 가끔 깨진 JSON으로 실패하죠. Gemini의 구조화 출력(responseSchema)으로 카테고리·근거 필드를 강제하면 파싱 단계를 통째로 제거할 수 있습니다.",
+      "recommendedAction": "responseSchema로 분류 출력 스키마를 고정"
+    }
+  ]
+}
+```
+
+4. failed
+분석 실패
+```
+event: failed
+data: {
+  "code": string,
+  "message": string,
+}
+```
+
+### 2. `GET /analyze/:jobId/results`
+분석 결과를 재조회하는 엔드포인트. SSE 연결이 끊겨 `completed` 이벤트를 수신하지 못한 경우, `jobId`로 결과를 다시 조회한다.
+
+*response*
+`completed` 이벤트의 `data`와 동일한 구조를 반환한다.
+```
+{
+  "jobId": "job_a1b2c3d4",
+  "repoFullName": "khuda-team4/rag-chat-service",
+  "analyzedAt": "2026-06-28T09:31:00Z",
+  "summary": {
+    "totalTrendsScanned": 142,
+    "matchedCount": 8,
+    "countByCategory": {
+      "replace": 3,
+      "apply": 3,
+      "impact": 2
+    }
+  },
+  "results": [
+    {
+      "id": "res_t1",
+      "category": "replace",
+      "relevanceScore": 94,
+      "title": "vLLM 0.9 — 연속 배칭",
+      "source": {
+        "name": "GitHub Trending",
+        "url": "https://github.com/vllm-project/vllm",
+        "publishedAt": "2026-06-27"
+      },
+      "reason": "지금 transformers.pipeline()로 요청을 순차 추론 중 — vLLM 연속 배칭이면 같은 GPU에서 처리량이 크게 올라요.",
+      "relatedFile": "api/inference.py",
+      "detail": "inference.py의 동기 추론 루프가 요청을 한 건씩 처리하고 있어 GPU 점유율이 낮습니다. vLLM의 continuous batching과 PagedAttention으로 바꾸면 같은 하드웨어에서 동시 처리량이 수 배 늘고, OpenAI 호환 서버로 띄우면 클라이언트 코드 변경도 거의 없습니다.",
+      "recommendedAction": "추론 서버를 vLLM OpenAI-compatible 엔드포인트로 교체"
+    },
+    {
+      "id": "res_t2",
+      "category": "apply",
+      "relevanceScore": 91,
+      "title": "Structured Outputs (JSON Schema)",
+      "source": {
+        "name": "GitHub",
+        "url": "https://github.com/google-gemini/cookbook",
+        "publishedAt": "2026-06-27"
+      },
+      "reason": "분류 결과 JSON을 정규식으로 파싱 중 — 스키마 강제 출력으로 파싱 실패를 없앨 수 있어요.",
+      "relatedFile": "api/analyze/route.ts",
+      "detail": "route.ts가 모델 응답에서 정규식으로 JSON을 긁어냅니다. 가끔 깨진 JSON으로 실패하죠. Gemini의 구조화 출력(responseSchema)으로 카테고리·근거 필드를 강제하면 파싱 단계를 통째로 제거할 수 있습니다.",
+      "recommendedAction": "responseSchema로 분류 출력 스키마를 고정"
+    },
+    {
+      "id": "res_t3",
+      "category": "replace",
+      "relevanceScore": 88,
+      "title": "BGE-M3 다국어 임베딩",
+      "source": {
+        "name": "arXiv",
+        "url": "https://arxiv.org/abs/2402.03216",
+        "publishedAt": "2026-06-26"
+      },
+      "reason": "ada-002로 한국어 문서를 임베딩 중 — BGE-M3가 다국어·롱컨텍스트 검색에서 더 좋은 회수율을 보여요.",
+      "relatedFile": "lib/embeddings.ts",
+      "detail": "embeddings.ts가 OpenAI text-embedding-ada-002를 호출합니다. 한국어가 섞인 사내 문서 검색에서는 BGE-M3가 회수율이 높고, 8192 토큰까지 한 번에 임베딩해 청크 경계 손실이 줄어듭니다. 자체 호스팅하면 임베딩 비용도 사라집니다.",
+      "recommendedAction": "임베딩 모델을 BGE-M3로 교체하고 벡터 차원 마이그레이션"
+    }
+  ]
+}
+```

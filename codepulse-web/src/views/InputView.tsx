@@ -1,8 +1,9 @@
 import { KeyboardEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CategoryBadge from '../components/CategoryBadge';
 import {
   Section, BadgePill, BadgeDot, HeroH1, HeroP, SearchPill, FieldLabel, InputLabel,
-  SearchInput, Divider, SearchBtn, InputMeta, FillBtn, KeyNote, SourcesRow, SourcesLabel,
+  SearchInput, SearchBtn, InputMeta, FillBtn, KeyNote, SourcesRow, SourcesLabel,
   SourcesDivider, SourcesChips, SourceChip, Taxonomy, TaxonomyTitle, TaxonomyGrid,
   TaxonomyCard, TaxonomyDesc,
 } from '../components/InputView/InputView.styled';
@@ -13,7 +14,6 @@ interface Props {
   apiKey: string;
   onRepoChange: (val: string) => void;
   onKeyChange: (val: string) => void;
-  onAnalyze: () => void;
   onFillSample: () => void;
 }
 
@@ -29,11 +29,16 @@ const TAXONOMY_ITEMS: TaxonomyItem[] = [
 ];
 
 export default function InputView({
-  repoUrl, apiKey, onRepoChange, onKeyChange, onAnalyze, onFillSample,
+  onFillSample, repoUrl, onRepoChange
 }: Props) {
+  const navigate = useNavigate();
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') onAnalyze();
+    if (e.key === 'Enter') onClick();
   };
+  const onClick = () => {
+    if(repoUrl == '' || !repoUrl) alert('레포지토리 url을 입력해주세요.');
+    else navigate('/analyzing', {state: {url: repoUrl}});
+  }
 
   return (
     <Section>
@@ -60,7 +65,7 @@ export default function InputView({
             spellCheck={false}
           />
         </FieldLabel>
-        <SearchBtn onClick={onAnalyze} aria-label="분석">
+        <SearchBtn onClick={onClick} aria-label="분석">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <circle cx="11" cy="11" r="7" stroke="#fff" strokeWidth="2" />
             <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
