@@ -1,0 +1,514 @@
+{
+  "repo": {
+    "repo_name": "8th-NLP-CoverLetter",
+    "repo_url": "https://github.com/khuda-data/8th-NLP-CoverLetter.git",
+    "readme": "# 자소서 검증 시스템\n\n자소서 텍스트에서 검증 가능한 주장(Claim)을 추출하고, 즉석 후속 질문을 통해 검증하는 시스템입니다.\n\n## 빠른 시작\n\n```bash\n# 환경 변수 설정\ncp env.example .env.local\n# .env.local 파일 편집\n\n# 컨테이너 실행\ndocker compose up -d\n\n# 헬스 체크\ncurl http://localhost:8000/health\n\n# API 문서: http://localhost:8000/docs\n```\n\n## 문서\n\n모든 문서는 [`docs/`](./docs/) 폴더에 정리되어 있습니다:\n\n- **[프로젝트 개요 및 개발 가이드](./docs/README.md)** - 전체 프로젝트 설명, API 목록, 개발 환경 설정\n- **[배포 가이드](./docs/deployment/README.md)** - AWS 배포 방법 및 GitHub Actions CI/CD\n- **[Claim 파싱 파이프라인](./docs/pipeline/README.md)** - 파이프라인 상세 설명\n- **[Colab 학습 가이드](./docs/colab/README.md)** - 모델 학습 방법\n- **[프롬프트 문서](./docs/prompts/README.md)** - 질문 생성 프롬프트 가이드\n- **[RoBERTa A/B 테스트 리포트](./docs/ROBERTA_AB_TEST_REPORT.md)** - 모델 성능 평가\n- **[아키텍처 다이어그램](./docs/diagrams/)** - 시스템 아키텍처 및 시퀀스 다이어그램\n\n## 프로젝트 구조\n\n```\nkhuda-homepage-ai/\n├── backend/          # FastAPI 백엔드\n├── deploy/           # 배포 스크립트\n├── colab/            # Colab 학습 노트북\n├── data/             # 학습 및 테스트 데이터\n├── docs/             # 프로젝트 문서\n└── docker-compose.yml\n```\n\n## 기술 스택\n\n- **Backend**: FastAPI, PostgreSQL, FAISS\n- **ML**: BERT 계열 (Claim 파싱), LLM (질문 생성)\n\n",
+    "dependencies": [
+      "PyYAML",
+      "alembic",
+      "faiss-cpu",
+      "fastapi",
+      "google-generativeai",
+      "httpx",
+      "kss",
+      "numpy",
+      "openai",
+      "psycopg2-binary",
+      "pydantic",
+      "pydantic-settings",
+      "python-dotenv",
+      "sentence-transformers",
+      "sqlalchemy",
+      "torch",
+      "transformers",
+      "uvicorn[standard]"
+    ],
+    "file_tree": [
+      "backend/app/api/__init__.py",
+      "backend/app/api/answers.py",
+      "backend/app/api/applications.py",
+      "backend/app/api/claims.py",
+      "backend/app/api/dependencies.py",
+      "backend/app/api/questions.py",
+      "backend/app/api/verification.py",
+      "backend/app/core/__init__.py",
+      "backend/app/core/config.py",
+      "backend/app/db/__init__.py",
+      "backend/app/db/base.py",
+      "backend/app/main.py",
+      "backend/app/models/__init__.py",
+      "backend/app/models/answer.py",
+      "backend/app/models/application.py",
+      "backend/app/models/application_text.py",
+      "backend/app/models/claim.py",
+      "backend/app/models/question.py",
+      "backend/app/models/question_set.py",
+      "backend/app/models/verification_result.py",
+      "backend/app/prompts/__init__.py",
+      "backend/app/schemas/__init__.py",
+      "backend/app/schemas/answer.py",
+      "backend/app/schemas/application.py",
+      "backend/app/schemas/claim.py",
+      "backend/app/schemas/common.py",
+      "backend/app/schemas/feedback.py",
+      "backend/app/schemas/question.py",
+      "backend/app/schemas/question_generation.py",
+      "backend/app/schemas/verification.py",
+      "backend/app/services/__init__.py",
+      "backend/app/services/claim_parser.py",
+      "backend/app/services/feedback_generator.py",
+      "backend/app/services/pipeline/__init__.py",
+      "backend/app/services/pipeline/claim_pipeline.py",
+      "backend/app/services/pipeline/confidence.py",
+      "backend/app/services/pipeline/encoder.py",
+      "backend/app/services/pipeline/model_scorer.py",
+      "backend/app/services/pipeline/models.py",
+      "backend/app/services/pipeline/prototypes/__init__.py",
+      "backend/app/services/pipeline/prototypes/seeds.py",
+      "backend/app/services/pipeline/question_processor.py",
+      "backend/app/services/pipeline/rule_scorer.py",
+      "backend/app/services/pipeline/rules/__init__.py",
+      "backend/app/services/pipeline/rules/patterns.py",
+      "backend/app/services/pipeline/sentence_splitter.py",
+      "backend/app/services/pipeline/source_question_estimator.py",
+      "backend/app/services/pipeline/span_creator.py",
+      "backend/app/services/prompt_manager.py",
+      "backend/app/services/question_generator.py",
+      "backend/app/services/vector_db.py",
+      "backend/app/services/verification.py",
+      "backend/app/utils/__init__.py",
+      "backend/app/utils/uuid.py",
+      "backend/migrations/env.py",
+      "backend/migrations/versions/001_initial_schema.py",
+      "backend/migrations/versions/002_add_training_support.py",
+      "backend/migrations/versions/003_cleanup_reason_codes.py"
+    ],
+    "code_context": "",
+    "meta_tags": [
+      "FastAPI",
+      "Backend/API",
+      "HTTP",
+      "LLM",
+      "RAG/VectorDB"
+    ]
+  },
+  "summary": {
+    "dist": {
+      "bad": 3,
+      "borderline": 3
+    },
+    "avg": {
+      "relevance": 40.0,
+      "groundedness": 41.7,
+      "actionability": 40.0,
+      "overall_score": 39.2
+    },
+    "hallucination_cards": 4
+  },
+  "judged": [
+    {
+      "trend": {
+        "trend_id": "arxiv_2607.02514",
+        "source": "arxiv",
+        "title": "Distributed Attacks in Persistent-State AI Control",
+        "summary": "As AI coding agents become more autonomous, they increasingly ship code iteratively, with the codebase persisting across sessions. This persistence creates a new attack surface: a misaligned or prompt-injected agent can distribute attacks across pull requests (PRs) and time its payload for the PR with the best natural cover. To study the resulting dynamics, we introduce Iterative VibeCoding, a setting for AI control, the study of safely deploying capable but potentially untrusted AI. In Iterative VibeCoding, a coding agent builds software over a sequence of PRs in a persistent codebase while pursuing a covert side task. Our benchmark includes two task families: CLI tools and Flask web services, across 20 total task variations. We use Claude Sonnet 4.5 as the attack agent and GPT-4o as the monitor. We compare gradual attacks, which distribute the side task across PRs, against non-gradual attacks concentrated in a single PR. No single monitor is robust to both: which strategy evades best (success while evading the monitor) depends on the monitor type, so a defender cannot close off both gradual and non-gradual attacks with any one monitor. High evasion (>= 65%) generalizes across model attack agent backends (Sonnet 4.5, Gemini 3.1 Pro, Kimi K2.5), confirming this is a property of the persistent-state attack surface rather than a single model's capability. Evasion also remains high across state-of-the-art monitor models and the gap between gradual and non-gradual evasion widens for more capable models. We introduce a stateful link-tracker monitor that tracks suspicious buildup across PRs. On both task families, it detects gradual attacks substantially better than diff monitors that merely see more accumulated history. Combining this stronger monitor with trajectory monitors in a four-monitor ensemble reduces gradual-attack evasion from 93% under the weakest standard diff monitor to 47%.",
+        "url": "http://arxiv.org/abs/2607.02514v1",
+        "type": "paper",
+        "published_at": "2026-07-02T17:59:56Z",
+        "authors_or_org": [
+          "Josh Hills",
+          "Ida Caspary",
+          "Asa Cooper Stickland"
+        ],
+        "task_tags": [
+          "Agent",
+          "Evaluation"
+        ],
+        "dependency_tags": [],
+        "impact_tags": [
+          "scalability"
+        ],
+        "keyword_tags": [
+          "benchmark"
+        ],
+        "raw_text": "As AI coding agents become more autonomous, they increasingly ship code iteratively, with the codebase persisting across sessions. This persistence creates a new attack surface: a misaligned or prompt-injected agent can distribute attacks across pull requests (PRs) and time its payload for the PR with the best natural cover. To study the resulting dynamics, we introduce Iterative VibeCoding, a setting for AI control, the study of safely deploying capable but potentially untrusted AI. In Iterative VibeCoding, a coding agent builds software over a sequence of PRs in a persistent codebase while pursuing a covert side task. Our benchmark includes two task families: CLI tools and Flask web services, across 20 total task variations. We use Claude Sonnet 4.5 as the attack agent and GPT-4o as the monitor. We compare gradual attacks, which distribute the side task across PRs, against non-gradual attacks concentrated in a single PR. No single monitor is robust to both: which strategy evades best (success while evading the monitor) depends on the monitor type, so a defender cannot close off both gradual and non-gradual attacks with any one monitor. High evasion (>= 65%) generalizes across model attack agent backends (Sonnet 4.5, Gemini 3.1 Pro, Kimi K2.5), confirming this is a property of the persistent-state attack surface rather than a single model's capability. Evasion also remains high across state-of-the-art monitor models and the gap between gradual and non-gradual evasion widens for more capable models. We introduce a stateful link-tracker monitor that tracks suspicious buildup across PRs. On both task families, it detects gradual attacks substantially better than diff monitors that merely see more accumulated history. Combining this stronger monitor with trajectory monitors in a four-monitor ensemble reduces gradual-attack evasion from 93% under the weakest standard diff monitor to 47%.",
+        "embedding_text": "Distributed Attacks in Persistent-State AI Control. As AI coding agents become more autonomous, they increasingly ship code iteratively, with the codebase persisting across sessions. This persistence creates a new attack surface: a misaligned or prompt-injected agent can distribute attacks across pull requests (PRs) and time its payload for the PR with the best natural cover. To study the resulting dynamics, we introduce Iterative VibeCoding, a setting for AI control, the study of safely deploying capable but potentially untrusted AI. In Iterative VibeCoding, a coding agent builds software over a sequence of PRs in a persistent codebase while pursuing a covert side task. Our benchmark includes two task families: CLI tools and Flask web services, across 20 total task variations. We use Claude Sonnet 4.5 as the attack agent and GPT-4o as the monitor. We compare gradual attacks, which distribute the side task across PRs, against non-gradual attacks concentrated in a single PR. No single monitor is robust to both: which strategy evades best (success while evading the monitor) depends on the monitor type, so a defender cannot close off both gradual and non-gradual attacks with any one monitor. High evasion (>= 65%) generalizes across model attack agent backends (Sonnet 4.5, Gemini 3.1 Pro, Kimi K2.5), confirming this is a property of the persistent-state attack surface rather than a single model's capability. Evasion also remains high across state-of-the-art monitor models and the gap between gradual and non-gradual evasion widens for more capable models. We introduce a stateful link-tracker monitor that tracks suspicious buildup across PRs. On both task families, it detects gradual attacks substantially better than diff monitors that merely see more accumulated history. Combining this stronger monitor with trajectory monitors in a four-monitor ensemble reduces gradual-attack evasion from 93% under the weakest standard diff monitor to 47%.. Tags: Agent, Evaluation, scalability, benchmark.",
+        "metadata": {
+          "source_score": null,
+          "stars": null,
+          "forks": null,
+          "comments": null,
+          "language": null,
+          "categories": [
+            "cs.AI"
+          ]
+        }
+      },
+      "card": {
+        "trend_id": "arxiv_2607.02514",
+        "classification": "new_application",
+        "classification_label": "신규적용",
+        "relevance_score": 75,
+        "display_decision": "show",
+        "evidence": [
+          "저장소는 AI 기반 자소서 검증 시스템을 개발하고 있으며, AI 코딩 에이전트의 자율성이 증가함에 따라 발생할 수 있는 새로운 공격 표면에 대한 연구가 필요합니다."
+        ],
+        "why_it_matters": "AI 코딩 에이전트의 자율성이 높아짐에 따라, 자소서 검증 시스템의 보안성을 강화할 필요성이 커지고 있습니다.",
+        "next_actions": [
+          "자소서 검증 시스템의 보안성을 높이기 위해, PR을 통한 공격 방어 전략을 검토합니다.",
+          "Iterative VibeCoding의 개념을 바탕으로, 자소서 검증 시스템에서의 AI 제어 방식을 개선할 수 있는 방법을 모색합니다.",
+          "모니터링 시스템을 강화하여, 자소서 검증 과정에서 발생할 수 있는 공격을 탐지할 수 있는 방법을 연구합니다."
+        ],
+        "related_files": []
+      },
+      "judge": {
+        "relevance": 30,
+        "groundedness": 20,
+        "actionability": 40,
+        "overall_score": 25,
+        "classification_verdict": "wrong",
+        "overall_verdict": "bad",
+        "hallucinated_evidence": [
+          "AI 코딩 에이전트의 자율성이 증가함에 따라 발생할 수 있는 새로운 공격 표면에 대한 연구가 필요합니다."
+        ],
+        "confidence": 1.0,
+        "n_samples": 1,
+        "engine": "gpt-4o"
+      }
+    },
+    {
+      "trend": {
+        "trend_id": "arxiv_2607.02513",
+        "source": "arxiv",
+        "title": "LACUNA: A Testbed for Evaluating Localization Precision for LLM Unlearning",
+        "summary": "LLMs memorize sensitive training data, including personally identifiable information (PII), creating a pressing need for reliable post hoc removal methods. Unlearning has emerged as a promising solution, with state-of-the-art(SOTA) methods often following a localize-first, unlearn-second paradigm that targets specific model parameters. However, existing benchmarks evaluate unlearning solely at the output level, leaving open the question of whether unlearning truly erases knowledge from a model's parameters or merely obfuscates it, a concern reinforced by the success of resurfacing attacks. To bridge this gap, we introduce LACUNA: the first unlearning testbed with ground-truth parameter-level localization. LACUNA injects PII of synthetic individuals into predefined parameters of 1B and 7B OLMo-based models via masked continual pretraining, enabling direct evaluation of whether unlearning targets the weights responsible for knowledge storage. We use LACUNA to benchmark current SOTA unlearning methods and find that, despite strong output-level performance, existing methods are highly imprecise and susceptible to resurfacing attacks. We further show that when localization is successful, even a simple gradient-based unlearning method achieves strong erasure and robustness to resurfacing attacks, highlighting the importance of precise unlearning. We release LACUNA to complement behavioral evaluations and drive further advances in robust, localization-based unlearning.",
+        "url": "http://arxiv.org/abs/2607.02513v1",
+        "type": "paper",
+        "published_at": "2026-07-02T17:59:52Z",
+        "authors_or_org": [
+          "Matteo Boglioni",
+          "Thibault Rousset",
+          "Siva Reddy",
+          "Marius Mosbach",
+          "Verna Dankers"
+        ],
+        "task_tags": [
+          "Evaluation"
+        ],
+        "dependency_tags": [],
+        "impact_tags": [
+          "accuracy"
+        ],
+        "keyword_tags": [
+          "benchmark"
+        ],
+        "raw_text": "LLMs memorize sensitive training data, including personally identifiable information (PII), creating a pressing need for reliable post hoc removal methods. Unlearning has emerged as a promising solution, with state-of-the-art(SOTA) methods often following a localize-first, unlearn-second paradigm that targets specific model parameters. However, existing benchmarks evaluate unlearning solely at the output level, leaving open the question of whether unlearning truly erases knowledge from a model's parameters or merely obfuscates it, a concern reinforced by the success of resurfacing attacks. To bridge this gap, we introduce LACUNA: the first unlearning testbed with ground-truth parameter-level localization. LACUNA injects PII of synthetic individuals into predefined parameters of 1B and 7B OLMo-based models via masked continual pretraining, enabling direct evaluation of whether unlearning targets the weights responsible for knowledge storage. We use LACUNA to benchmark current SOTA unlearning methods and find that, despite strong output-level performance, existing methods are highly imprecise and susceptible to resurfacing attacks. We further show that when localization is successful, even a simple gradient-based unlearning method achieves strong erasure and robustness to resurfacing attacks, highlighting the importance of precise unlearning. We release LACUNA to complement behavioral evaluations and drive further advances in robust, localization-based unlearning.",
+        "embedding_text": "LACUNA: A Testbed for Evaluating Localization Precision for LLM Unlearning. LLMs memorize sensitive training data, including personally identifiable information (PII), creating a pressing need for reliable post hoc removal methods. Unlearning has emerged as a promising solution, with state-of-the-art(SOTA) methods often following a localize-first, unlearn-second paradigm that targets specific model parameters. However, existing benchmarks evaluate unlearning solely at the output level, leaving open the question of whether unlearning truly erases knowledge from a model's parameters or merely obfuscates it, a concern reinforced by the success of resurfacing attacks. To bridge this gap, we introduce LACUNA: the first unlearning testbed with ground-truth parameter-level localization. LACUNA injects PII of synthetic individuals into predefined parameters of 1B and 7B OLMo-based models via masked continual pretraining, enabling direct evaluation of whether unlearning targets the weights responsible for knowledge storage. We use LACUNA to benchmark current SOTA unlearning methods and find that, despite strong output-level performance, existing methods are highly imprecise and susceptible to resurfacing attacks. We further show that when localization is successful, even a simple gradient-based unlearning method achieves strong erasure and robustness to resurfacing attacks, highlighting the importance of precise unlearning. We release LACUNA to complement behavioral evaluations and drive further advances in robust, localization-based unlearning.. Tags: Evaluation, accuracy, benchmark.",
+        "metadata": {
+          "source_score": null,
+          "stars": null,
+          "forks": null,
+          "comments": null,
+          "language": null,
+          "categories": [
+            "cs.CL",
+            "cs.AI",
+            "cs.LG"
+          ]
+        }
+      },
+      "card": {
+        "trend_id": "arxiv_2607.02513",
+        "classification": "new_application",
+        "classification_label": "신규적용",
+        "relevance_score": 75,
+        "display_decision": "show",
+        "evidence": [
+          "저장소는 LLM(대형 언어 모델)을 활용하여 자소서 검증 시스템을 구축하고 있으며, LACUNA의 연구 결과는 LLM의 지식 삭제 및 검증과 관련된 중요한 통찰을 제공할 수 있습니다."
+        ],
+        "why_it_matters": "LACUNA는 LLM의 지식 삭제 정확성을 평가할 수 있는 테스트베드로, 자소서 검증 시스템의 신뢰성을 높이는 데 기여할 수 있습니다.",
+        "next_actions": [
+          "LACUNA의 방법론을 참고하여 자소서 검증 시스템에서 LLM의 지식 삭제 방법을 개선할 수 있는 방안을 모색합니다.",
+          "현재 사용 중인 LLM 모델의 성능을 LACUNA의 벤치마크와 비교하여 개선 가능성을 평가합니다.",
+          "LACUNA의 결과를 바탕으로 자소서 검증 시스템의 데이터 보호 및 개인 정보 삭제 기능을 강화하는 방법을 연구합니다."
+        ],
+        "related_files": []
+      },
+      "judge": {
+        "relevance": 40,
+        "groundedness": 30,
+        "actionability": 20,
+        "overall_score": 30,
+        "classification_verdict": "borderline",
+        "overall_verdict": "bad",
+        "hallucinated_evidence": [
+          "LACUNA의 연구 결과는 LLM의 지식 삭제 및 검증과 관련된 중요한 통찰을 제공할 수 있습니다."
+        ],
+        "confidence": 1.0,
+        "n_samples": 1,
+        "engine": "gpt-4o"
+      }
+    },
+    {
+      "trend": {
+        "trend_id": "arxiv_2607.02512",
+        "source": "arxiv",
+        "title": "Program-as-Weights: A Programming Paradigm for Fuzzy Functions",
+        "summary": "Many everyday programming tasks resist clean rule-based implementation, such as alerting on important log lines, repairing malformed JSON, or ranking search results by intent, and are increasingly outsourced to large language model APIs at the cost of locality, reproducibility, and price. We propose fuzzy-function programming: compiling such a function from a natural-language specification into a compact, locally-executable neural artifact. We instantiate this paradigm with Program-as-Weights (PAW), in which a 4B compiler trained on FuzzyBench, a 10M-example dataset we release, emits parameter-efficient adapters for a frozen, lightweight interpreter. A 0.6B Qwen3 interpreter executing PAW programs matches the performance of direct prompting of Qwen3-32B, while using roughly one fiftieth of the inference memory and running at 30 tokens/s on a MacBook M3. PAW reframes the foundation model from a per-input problem solver into a tool builder: invoked once per function definition, it produces a small reusable artifact whose subsequent calls per function application are cheap and offline.",
+        "url": "http://arxiv.org/abs/2607.02512v1",
+        "type": "paper",
+        "published_at": "2026-07-02T17:59:50Z",
+        "authors_or_org": [
+          "Wentao Zhang",
+          "Liliana Hotsko",
+          "Woojeong Kim",
+          "Pengyu Nie",
+          "Stuart Shieber",
+          "Yuntian Deng"
+        ],
+        "task_tags": [
+          "Inference",
+          "Fine-tuning"
+        ],
+        "dependency_tags": [],
+        "impact_tags": [
+          "cost"
+        ],
+        "keyword_tags": [],
+        "raw_text": "Many everyday programming tasks resist clean rule-based implementation, such as alerting on important log lines, repairing malformed JSON, or ranking search results by intent, and are increasingly outsourced to large language model APIs at the cost of locality, reproducibility, and price. We propose fuzzy-function programming: compiling such a function from a natural-language specification into a compact, locally-executable neural artifact. We instantiate this paradigm with Program-as-Weights (PAW), in which a 4B compiler trained on FuzzyBench, a 10M-example dataset we release, emits parameter-efficient adapters for a frozen, lightweight interpreter. A 0.6B Qwen3 interpreter executing PAW programs matches the performance of direct prompting of Qwen3-32B, while using roughly one fiftieth of the inference memory and running at 30 tokens/s on a MacBook M3. PAW reframes the foundation model from a per-input problem solver into a tool builder: invoked once per function definition, it produces a small reusable artifact whose subsequent calls per function application are cheap and offline.",
+        "embedding_text": "Program-as-Weights: A Programming Paradigm for Fuzzy Functions. Many everyday programming tasks resist clean rule-based implementation, such as alerting on important log lines, repairing malformed JSON, or ranking search results by intent, and are increasingly outsourced to large language model APIs at the cost of locality, reproducibility, and price. We propose fuzzy-function programming: compiling such a function from a natural-language specification into a compact, locally-executable neural artifact. We instantiate this paradigm with Program-as-Weights (PAW), in which a 4B compiler trained on FuzzyBench, a 10M-example dataset we release, emits parameter-efficient adapters for a frozen, lightweight interpreter. A 0.6B Qwen3 interpreter executing PAW programs matches the performance of direct prompting of Qwen3-32B, while using roughly one fiftieth of the inference memory and running at 30 tokens/s on a MacBook M3. PAW reframes the foundation model from a per-input problem solver into a tool builder: invoked once per function definition, it produces a small reusable artifact whose subsequent calls per function application are cheap and offline.. Tags: Inference, Fine-tuning, cost.",
+        "metadata": {
+          "source_score": null,
+          "stars": null,
+          "forks": null,
+          "comments": null,
+          "language": null,
+          "categories": [
+            "cs.LG",
+            "cs.AI",
+            "cs.CL"
+          ]
+        }
+      },
+      "card": {
+        "trend_id": "arxiv_2607.02512",
+        "classification": "new_application",
+        "classification_label": "신규적용",
+        "relevance_score": 75,
+        "display_decision": "show",
+        "evidence": [
+          "저장소는 자소서 검증 시스템을 구축하고 있으며, 자연어 처리(NLP)와 관련된 다양한 기술 스택을 사용하고 있습니다. 이 트렌드는 자연어 명세를 기반으로 한 프로그래밍 패러다임을 제안하고 있어, 자소서 검증 시스템의 기능을 확장할 수 있는 가능성이 있습니다."
+        ],
+        "why_it_matters": "이 트렌드는 자연어 처리 작업을 더 효율적으로 수행할 수 있는 새로운 방법을 제시하며, 자소서 검증 시스템의 성능을 향상시킬 수 있습니다.",
+        "next_actions": [
+          "자연어 명세를 기반으로 한 프로그래밍 패러다임을 연구하여 자소서 검증 시스템에 적용할 수 있는 방법을 모색합니다.",
+          "트렌드에서 제안하는 PAW(Program-as-Weights) 개념을 활용하여 자소서 검증 시스템의 특정 기능을 개선할 수 있는 방안을 검토합니다.",
+          "FuzzyBench 데이터셋과 유사한 데이터셋을 활용하여 모델 성능을 평가하고, 새로운 기능을 실험해봅니다."
+        ],
+        "related_files": []
+      },
+      "judge": {
+        "relevance": 50,
+        "groundedness": 60,
+        "actionability": 40,
+        "overall_score": 50,
+        "classification_verdict": "borderline",
+        "overall_verdict": "borderline",
+        "hallucinated_evidence": [],
+        "confidence": 1.0,
+        "n_samples": 1,
+        "engine": "gpt-4o"
+      }
+    },
+    {
+      "trend": {
+        "trend_id": "arxiv_2607.02510",
+        "source": "arxiv",
+        "title": "Online Safety Monitoring for LLMs",
+        "summary": "Despite alignment training, LLMs remain prone to generating unsafe outputs at deployment time. Monitoring outputs online and raising an alarm when safety can no longer be assumed is therefore critical. We study a simple real-time monitor that turns a verifier signal from an external model into an alarm decision by thresholding, with the threshold calibrated via risk control. In experiments on mathematical reasoning and red teaming datasets, we show that this simple design is competitive with more advanced monitors based on sequential hypothesis testing.",
+        "url": "http://arxiv.org/abs/2607.02510v1",
+        "type": "paper",
+        "published_at": "2026-07-02T17:59:43Z",
+        "authors_or_org": [
+          "Mona Schirmer",
+          "Metod Jazbec",
+          "Alexander Timans",
+          "Christian Naesseth",
+          "Maja Waldron",
+          "Eric Nalisnick"
+        ],
+        "task_tags": [],
+        "dependency_tags": [],
+        "impact_tags": [
+          "security"
+        ],
+        "keyword_tags": [
+          "safety"
+        ],
+        "raw_text": "Despite alignment training, LLMs remain prone to generating unsafe outputs at deployment time. Monitoring outputs online and raising an alarm when safety can no longer be assumed is therefore critical. We study a simple real-time monitor that turns a verifier signal from an external model into an alarm decision by thresholding, with the threshold calibrated via risk control. In experiments on mathematical reasoning and red teaming datasets, we show that this simple design is competitive with more advanced monitors based on sequential hypothesis testing.",
+        "embedding_text": "Online Safety Monitoring for LLMs. Despite alignment training, LLMs remain prone to generating unsafe outputs at deployment time. Monitoring outputs online and raising an alarm when safety can no longer be assumed is therefore critical. We study a simple real-time monitor that turns a verifier signal from an external model into an alarm decision by thresholding, with the threshold calibrated via risk control. In experiments on mathematical reasoning and red teaming datasets, we show that this simple design is competitive with more advanced monitors based on sequential hypothesis testing.. Tags: security, safety.",
+        "metadata": {
+          "source_score": null,
+          "stars": null,
+          "forks": null,
+          "comments": null,
+          "language": null,
+          "categories": [
+            "cs.AI",
+            "cs.CL",
+            "cs.LG",
+            "stat.AP",
+            "stat.ML"
+          ]
+        }
+      },
+      "card": {
+        "trend_id": "arxiv_2607.02510",
+        "classification": "new_application",
+        "classification_label": "신규적용",
+        "relevance_score": 75,
+        "display_decision": "show",
+        "evidence": [
+          "저장소는 LLM(대형 언어 모델)을 활용하여 자소서의 검증 가능한 주장을 추출하고 질문을 생성하는 시스템을 구축하고 있습니다. 따라서 LLM의 안전성 모니터링 기술은 이 시스템의 신뢰성을 높이는 데 기여할 수 있습니다."
+        ],
+        "why_it_matters": "LLM의 안전성을 보장하는 것은 자소서 검증 시스템의 신뢰성을 높이는 데 필수적입니다.",
+        "next_actions": [
+          "LLM의 출력 안전성을 모니터링하는 방법을 연구하여 시스템에 통합할 수 있는 방안을 모색합니다.",
+          "제안된 모니터링 기법을 사용하여 자소서 검증 시스템의 안전성을 평가하는 테스트를 진행합니다.",
+          "안전성 모니터링을 위한 외부 모델과의 통합 가능성을 검토합니다."
+        ],
+        "related_files": []
+      },
+      "judge": {
+        "relevance": 60,
+        "groundedness": 80,
+        "actionability": 50,
+        "overall_score": 65,
+        "classification_verdict": "correct",
+        "overall_verdict": "borderline",
+        "hallucinated_evidence": [],
+        "confidence": 1.0,
+        "n_samples": 1,
+        "engine": "gpt-4o"
+      }
+    },
+    {
+      "trend": {
+        "trend_id": "github_significant_gravitas_autogpt",
+        "source": "github",
+        "title": "Significant-Gravitas/AutoGPT",
+        "summary": "AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so that you can focus on what matters.",
+        "url": "https://github.com/Significant-Gravitas/AutoGPT",
+        "type": "repo",
+        "published_at": "2023-03-16T09:21:07Z",
+        "authors_or_org": [
+          "Significant-Gravitas"
+        ],
+        "task_tags": [],
+        "dependency_tags": [],
+        "impact_tags": [],
+        "keyword_tags": [],
+        "raw_text": "AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so that you can focus on what matters.",
+        "embedding_text": "Significant-Gravitas/AutoGPT. AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so that you can focus on what matters.. Tags: .",
+        "metadata": {
+          "source_score": 185291.0,
+          "stars": 185291,
+          "forks": 46118,
+          "comments": null,
+          "language": "Python",
+          "categories": []
+        }
+      },
+      "card": {
+        "trend_id": "github_significant_gravitas_autogpt",
+        "classification": "new_application",
+        "classification_label": "신규적용",
+        "relevance_score": 75,
+        "display_decision": "show",
+        "evidence": [
+          "이 저장소는 자소서 검증 시스템을 구축하고 있으며, AutoGPT는 접근 가능한 AI를 제공하여 사용자가 쉽게 활용할 수 있도록 돕는 도구입니다. 이는 자소서 검증 시스템의 질문 생성 및 사용자 인터페이스 개선에 기여할 수 있습니다."
+        ],
+        "why_it_matters": "AutoGPT는 사용자가 AI를 쉽게 활용할 수 있도록 하여, 자소서 검증 시스템의 기능을 확장할 수 있는 가능성을 제공합니다.",
+        "next_actions": [
+          "AutoGPT의 기능을 검토하여 자소서 검증 시스템의 질문 생성 프로세스에 통합할 수 있는 방법을 모색합니다.",
+          "AutoGPT의 문서 및 예제를 참고하여 시스템에 적용할 수 있는 구체적인 사용 사례를 개발합니다.",
+          "자소서 검증 시스템의 사용자 경험을 개선하기 위해 AutoGPT를 활용한 프로토타입을 제작합니다."
+        ],
+        "related_files": []
+      },
+      "judge": {
+        "relevance": 30,
+        "groundedness": 20,
+        "actionability": 40,
+        "overall_score": 25,
+        "classification_verdict": "borderline",
+        "overall_verdict": "bad",
+        "hallucinated_evidence": [
+          "AutoGPT가 자소서 검증 시스템의 질문 생성 및 사용자 인터페이스 개선에 기여할 수 있다는 주장"
+        ],
+        "confidence": 1.0,
+        "n_samples": 1,
+        "engine": "gpt-4o"
+      }
+    },
+    {
+      "trend": {
+        "trend_id": "github_ollama_ollama",
+        "source": "github",
+        "title": "ollama/ollama",
+        "summary": "Get up and running with Kimi-K2.6, GLM-5.1, MiniMax, DeepSeek, gpt-oss, Qwen, Gemma and other models.",
+        "url": "https://github.com/ollama/ollama",
+        "type": "repo",
+        "published_at": "2023-06-26T19:39:32Z",
+        "authors_or_org": [
+          "ollama"
+        ],
+        "task_tags": [],
+        "dependency_tags": [],
+        "impact_tags": [],
+        "keyword_tags": [],
+        "raw_text": "Get up and running with Kimi-K2.6, GLM-5.1, MiniMax, DeepSeek, gpt-oss, Qwen, Gemma and other models.",
+        "embedding_text": "ollama/ollama. Get up and running with Kimi-K2.6, GLM-5.1, MiniMax, DeepSeek, gpt-oss, Qwen, Gemma and other models.. Tags: .",
+        "metadata": {
+          "source_score": 175331.0,
+          "stars": 175331,
+          "forks": 16802,
+          "comments": null,
+          "language": "Go",
+          "categories": []
+        }
+      },
+      "card": {
+        "trend_id": "github_ollama_ollama",
+        "classification": "new_application",
+        "classification_label": "신규적용",
+        "relevance_score": 75,
+        "display_decision": "show",
+        "evidence": [
+          "저장소는 자소서 검증 시스템을 구축하고 있으며, 다양한 모델을 활용하여 질문을 생성하고 검증하는 기능을 포함하고 있습니다. ollama/ollama는 여러 모델을 지원하므로, 이 저장소의 목표에 적합할 수 있습니다."
+        ],
+        "why_it_matters": "다양한 모델을 활용하여 질문 생성 및 검증을 개선할 수 있는 기회를 제공합니다.",
+        "next_actions": [
+          "ollama/ollama의 모델을 테스트하여 자소서 검증 시스템에 통합할 수 있는 가능성을 평가합니다.",
+          "모델 성능을 비교하기 위해 ollama/ollama에서 제공하는 모델과 현재 사용 중인 모델의 결과를 분석합니다.",
+          "ollama/ollama의 문서를 검토하여 해당 모델을 효과적으로 활용할 수 있는 방법을 모색합니다."
+        ],
+        "related_files": []
+      },
+      "judge": {
+        "relevance": 30,
+        "groundedness": 40,
+        "actionability": 50,
+        "overall_score": 40,
+        "classification_verdict": "borderline",
+        "overall_verdict": "borderline",
+        "hallucinated_evidence": [
+          "ollama/ollama is not mentioned in the repo context"
+        ],
+        "confidence": 1.0,
+        "n_samples": 1,
+        "engine": "gpt-4o"
+      }
+    }
+  ]
+}
