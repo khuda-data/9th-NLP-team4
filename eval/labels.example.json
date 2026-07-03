@@ -1,0 +1,12 @@
+[
+  { "trend_id": "t01", "repo_id": "repo_gram", "engine_score": 95, "human_label": 1, "note": "ViT 백본 개선 트렌드 - Gram이 ViT 3파일 사용, 관련 명확" },
+  { "trend_id": "t02", "repo_id": "repo_gram", "engine_score": 90, "human_label": 1, "note": "이미지 임베딩 경량화 - 궁합 판독 모델에 직접 적용 가능" },
+  { "trend_id": "t03", "repo_id": "repo_gram", "engine_score": 88, "human_label": 1, "note": "데이터 증강 기법 - 학습 파이프라인에 유용" },
+  { "trend_id": "t04", "repo_id": "repo_gram", "engine_score": 82, "human_label": 1, "note": "FastAPI 보안 패치 - 백엔드가 FastAPI" },
+  { "trend_id": "t05", "repo_id": "repo_gram", "engine_score": 78, "human_label": 1, "note": "React 폼 라이브러리 - 프론트에 적용 가능" },
+  { "trend_id": "t06", "repo_id": "repo_gram", "engine_score": 70, "human_label": 0, "note": "엔진은 높게 줬지만 사람이 보기엔 일반 AI 뉴스라 노이즈" },
+  { "trend_id": "t07", "repo_id": "repo_gram", "engine_score": 65, "human_label": 1, "note": "관련 있는데 엔진이 낮게 매김(놓칠 뻔한 케이스)" },
+  { "trend_id": "t08", "repo_id": "repo_gram", "engine_score": 55, "human_label": 0, "note": "LLM 에이전트 프레임워크 - Gram은 안 씀" },
+  { "trend_id": "t09", "repo_id": "repo_gram", "engine_score": 40, "human_label": 0, "note": "로보틱스 논문 - 완전 무관" },
+  { "trend_id": "t10", "repo_id": "repo_gram", "engine_score": 20, "human_label": 0, "note": "AI 시장 성장 일반 뉴스 - 무관" }
+]
