@@ -23,11 +23,11 @@ export default function AnalyzingView({ repoDisplay }: Props) {
   const location = useLocation();
   const navigate = useNavigate();
   const [stepStatusByIndex, setStepStatusByIndex] = useState<Record<number, status>>({});
-  const [jobId, setJobId] = useState('');
 
   useEffect(() => {
     const handleAnalyze = async () => {
       let completed = false;
+      let jobId = '';
       for await (const text of analyze(location.state.url)) {
         const events = text.split("\n\n");
         for(const event of events) {
@@ -50,10 +50,12 @@ export default function AnalyzingView({ repoDisplay }: Props) {
 
             console.log(eventName);
             console.log(payload);
-            if(eventName == 'job_created') console.log(eventName, payload);
+            if(eventName == 'job_created') {
+              console.log(eventName, payload);
+              jobId = payload["jobId"];
+            }
             else if(eventName == 'step_update') {
               const { stepIndex: idx, status }: IStepInfo = payload;
-              setJobId(payload["jobId"]);
               setStepStatusByIndex(prev => ({ ...prev, [idx]: status }));
             }
             else if(eventName == 'completed') {
@@ -71,6 +73,7 @@ export default function AnalyzingView({ repoDisplay }: Props) {
       if(!completed) {
         if(jobId != '') {
           const result = await getResults(jobId);
+          console.log('getResults success');
           console.log(result);
           navigate('/results', {state: {result: result}});
         }

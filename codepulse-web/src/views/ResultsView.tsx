@@ -6,6 +6,8 @@ import {
 } from '../components/ResultsView/ResultsView.styled';
 import { CATS, CatKey, FilterKey } from '../data';
 import { useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { getResults } from '../utils/getResults';
 
 interface Props {
   repoDisplay: string;
@@ -51,6 +53,13 @@ export default function ResultsView({
   const location = useLocation();
   const result = location.state.result;
   console.log(result);
+  // useEffect(() => {
+  //   const handle = async () => {
+  //     const res = await getResults(result["jobId"]);
+  //     console.log(res);
+  //   }
+  //   handle();
+  // }, [])
 
   const visibleCards = result["results"]
     .filter((d:IResult) => filter === 'all' || d.category === filter)
