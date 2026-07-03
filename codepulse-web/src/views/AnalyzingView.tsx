@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { analyze } from '../utils/analyze';
 import { STEPS } from '../data';
+import { getResults } from '../utils/getResults';
 
 interface Props {
   repoDisplay: string;
@@ -22,9 +23,11 @@ export default function AnalyzingView({ repoDisplay }: Props) {
   const location = useLocation();
   const navigate = useNavigate();
   const [stepStatusByIndex, setStepStatusByIndex] = useState<Record<number, status>>({});
-  
+  const [jobId, setJobId] = useState('');
+
   useEffect(() => {
     const handleAnalyze = async () => {
+      let completed = false;
       for await (const text of analyze(location.state.url)) {
         const events = text.split("\n\n");
         for(const event of events) {
@@ -50,13 +53,30 @@ export default function AnalyzingView({ repoDisplay }: Props) {
             if(eventName == 'job_created') console.log(eventName, payload);
             else if(eventName == 'step_update') {
               const { stepIndex: idx, status }: IStepInfo = payload;
+              setJobId(payload["jobId"]);
               setStepStatusByIndex(prev => ({ ...prev, [idx]: status }));
             }
             else if(eventName == 'completed') {
               console.log(eventName, payload);
+              completed = true;
               navigate('/results', {state: {result: payload}});
             }
+            else if(eventName == "failed") {
+              alert(payload["message"]);
+              navigate('/');
+            }
           }
+        }
+      }
+      if(!completed) {
+        if(jobId != '') {
+          const result = await getResults(jobId);
+          console.log(result);
+          navigate('/results', {state: {result: result}});
+        }
+        else {
+          alert('분석 오류');
+          navigate('/');
         }
       }
     }

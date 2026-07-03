@@ -5,7 +5,7 @@ import Header from './components/Header';
 import InputView from './views/InputView';
 import AnalyzingView from './views/AnalyzingView';
 import ResultsView from './views/ResultsView';
-import { FilterKey, STEPS } from './data';
+import { FilterKey } from './data';
 
 const SAMPLE_REPO = 'khuda-team4/rag-chat-service';
 
