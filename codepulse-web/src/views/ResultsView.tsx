@@ -53,13 +53,6 @@ export default function ResultsView({
   const location = useLocation();
   const result = location.state.result;
   console.log(result);
-  // useEffect(() => {
-  //   const handle = async () => {
-  //     const res = await getResults(result["jobId"]);
-  //     console.log(res);
-  //   }
-  //   handle();
-  // }, [])
 
   const visibleCards = result["results"]
     .filter((d:IResult) => filter === 'all' || d.category === filter)
