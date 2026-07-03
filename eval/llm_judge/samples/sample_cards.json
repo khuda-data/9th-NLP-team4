@@ -1,0 +1,113 @@
+[
+  {
+    "id": "good_reranking",
+    "gold": { "verdict": "good" },
+    "repo_context": {
+      "repo_name": "pdf-rag-assistant",
+      "repo_url": "https://github.com/user/pdf-rag-assistant",
+      "readme": "PDF 문서를 업로드하면 RAG 기반으로 질문에 답하는 프로젝트입니다.",
+      "dependencies": ["faiss-cpu", "langchain", "openai", "fastapi", "pypdf"],
+      "file_tree": ["rag/retriever.py", "rag/generator.py", "rag/loader.py", "requirements.txt", "README.md"],
+      "code_context": "retriever.py에서 FAISS 기반 top-k 검색을 수행하고 결과를 generator로 넘긴다.",
+      "meta_tags": ["RAG", "LLM", "PDF", "FastAPI"]
+    },
+    "trend": {
+      "trend_id": "arxiv_2406.12345",
+      "source": "arxiv",
+      "title": "New reranking method improves RAG retrieval quality",
+      "summary": "RAG 시스템에서 초기 검색 결과를 reranker로 재정렬해 답변 품질을 높이는 방법을 제안한다.",
+      "url": "https://arxiv.org/abs/2406.12345",
+      "type": "paper",
+      "task_tags": ["RAG", "Evaluation"],
+      "keyword_tags": ["retrieval", "reranker"]
+    },
+    "impact_card": {
+      "trend_id": "arxiv_2406.12345",
+      "classification": "replacement_candidate",
+      "classification_label": "대체후보",
+      "relevance_score": 84,
+      "display_decision": "show",
+      "evidence": [
+        "dependencies에 faiss-cpu가 포함되어 있음",
+        "file_tree에 rag/retriever.py가 존재하고 FAISS top-k 검색을 수행함",
+        "README에 RAG 기반 PDF QA 프로젝트라고 설명됨"
+      ],
+      "why_it_matters": "현재 repo는 FAISS 기반 top-k 검색만 쓰고 reranking 단계가 없어, reranking 기법이 검색 품질을 개선할 대체후보가 된다.",
+      "next_actions": [
+        "rag/retriever.py에서 FAISS top-k 결과를 반환하는 지점을 확인한다.",
+        "top-k 이후 reranker를 적용하는 post-processing 단계를 추가한다.",
+        "기존 FAISS-only와 reranker 적용을 Hit@k/MRR로 비교한다."
+      ],
+      "related_files": ["rag/retriever.py", "requirements.txt", "README.md"]
+    }
+  },
+  {
+    "id": "hallucinated_file",
+    "gold": { "verdict": "bad" },
+    "repo_context": {
+      "repo_name": "pdf-rag-assistant",
+      "repo_url": "https://github.com/user/pdf-rag-assistant",
+      "readme": "PDF 문서를 업로드하면 RAG 기반으로 질문에 답하는 프로젝트입니다.",
+      "dependencies": ["faiss-cpu", "langchain", "openai", "fastapi", "pypdf"],
+      "file_tree": ["rag/retriever.py", "rag/generator.py", "rag/loader.py", "requirements.txt", "README.md"],
+      "code_context": "retriever.py에서 FAISS 기반 top-k 검색을 수행한다.",
+      "meta_tags": ["RAG", "LLM", "PDF", "FastAPI"]
+    },
+    "trend": {
+      "trend_id": "arxiv_2406.12345",
+      "source": "arxiv",
+      "title": "New reranking method improves RAG retrieval quality",
+      "summary": "reranker로 검색 결과를 재정렬해 품질을 높인다.",
+      "url": "https://arxiv.org/abs/2406.12345",
+      "type": "paper",
+      "keyword_tags": ["reranker", "retrieval"]
+    },
+    "impact_card": {
+      "trend_id": "arxiv_2406.12345",
+      "classification": "impact",
+      "classification_label": "영향",
+      "relevance_score": 90,
+      "display_decision": "show",
+      "evidence": [
+        "rag/reranker.py에서 이미 cross-encoder reranking을 구현하고 있음",
+        "config/rerank.yaml 설정으로 reranker 모델을 지정함"
+      ],
+      "why_it_matters": "이미 reranker.py로 reranking을 하고 있으므로 이 논문은 직접적인 영향을 준다.",
+      "next_actions": ["rag/reranker.py의 모델을 논문 방식으로 교체한다."],
+      "related_files": ["rag/reranker.py", "config/rerank.yaml"]
+    }
+  },
+  {
+    "id": "irrelevant_keyword_only",
+    "gold": { "verdict": "bad" },
+    "repo_context": {
+      "repo_name": "todo-web",
+      "repo_url": "https://github.com/user/todo-web",
+      "readme": "React로 만든 간단한 할 일 관리 웹앱입니다.",
+      "dependencies": ["react", "vite", "tailwindcss"],
+      "file_tree": ["src/App.tsx", "src/components/TodoList.tsx", "package.json"],
+      "code_context": "App.tsx가 로컬스토리지에 할 일을 저장한다.",
+      "meta_tags": ["Frontend", "React"]
+    },
+    "trend": {
+      "trend_id": "arxiv_2407.55555",
+      "source": "arxiv",
+      "title": "A new reinforcement learning method for robot locomotion",
+      "summary": "사족 보행 로봇의 이동을 강화학습으로 개선하는 방법.",
+      "url": "https://arxiv.org/abs/2407.55555",
+      "type": "paper",
+      "keyword_tags": ["reinforcement learning", "robotics"]
+    },
+    "impact_card": {
+      "trend_id": "arxiv_2407.55555",
+      "classification": "new_application",
+      "classification_label": "신규적용",
+      "relevance_score": 72,
+      "display_decision": "show",
+      "evidence": ["AI 트렌드로서 최신 연구임", "머신러닝 기법이 포함됨"],
+      "why_it_matters": "최신 AI 기법이므로 프로젝트에 적용을 검토할 만하다.",
+      "next_actions": ["이 논문을 읽고 적용 여부를 검토한다."],
+      "related_files": []
+    }
+  }
+]
