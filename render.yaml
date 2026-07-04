@@ -1,0 +1,23 @@
+# Render Blueprint — CodePulse 백엔드(FastAPI) 배포 설정.
+# Render 대시보드에서 "New +" → "Blueprint" → 이 리포 선택하면 이 설정대로 생성된다.
+# (수동 Web Service로 만들 경우엔 아래 값들을 그대로 입력하면 됨)
+services:
+  - type: web
+    name: codepulse-backend
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: USE_FAKE_LLM
+        value: "false"
+      - key: LLM_PROVIDER
+        value: openai
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      # 실제 키는 대시보드에서 직접 입력(리포에 커밋 금지)
+      - key: OPENAI_API_KEY
+        sync: false

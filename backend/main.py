@@ -32,6 +32,8 @@ app.add_middleware(
         "http://localhost:5173",
         "http://localhost:3000",
     ],
+    # 배포된 프론트(Vercel)에서의 요청을 허용. *.vercel.app 프리뷰/프로덕션 도메인 매칭.
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
