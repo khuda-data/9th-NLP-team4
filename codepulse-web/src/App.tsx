@@ -5,9 +5,9 @@ import Header from './components/Header';
 import InputView from './views/InputView';
 import AnalyzingView from './views/AnalyzingView';
 import ResultsView from './views/ResultsView';
-import { FilterKey, STEPS } from './data';
+import { FilterKey } from './data';
 
-const SAMPLE_REPO = 'khuda-team4/rag-chat-service';
+const SAMPLE_REPO = 'https://github.com/khuda-data/9th-NLP-team4';
 
 const PageWrap = styled.div`
   min-height: 100vh;
@@ -31,24 +31,6 @@ function AppRoutes() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const repoDisplay = repoUrl.trim() || SAMPLE_REPO;
-
-  // function startAnalyze() {
-  //   if (timerRef.current) clearInterval(timerRef.current);
-  //   navigate('/analyzing');
-  //   setStepIndex(0);
-
-  //   timerRef.current = setInterval(() => {
-  //     setStepIndex(prev => {
-  //       const next = prev + 1;
-  //       if (next >= STEPS.length) {
-  //         clearInterval(timerRef.current!);
-  //         timerRef.current = null;
-  //         navigate('/results');
-  //       }
-  //       return next;
-  //     });
-  //   }, 850);
-  // }
 
   function reset() {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
