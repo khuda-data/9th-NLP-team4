@@ -108,7 +108,7 @@ export default function AnalyzingView({ repoDisplay }: Props) {
           />
         ))}
       </StepsList>
-
+      <Note>공개 트렌드 API와 llm의 분석으로 처리됩니다.</Note>
     </Section>
   );
 }
