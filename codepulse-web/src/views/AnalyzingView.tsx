@@ -28,8 +28,11 @@ export default function AnalyzingView({ repoDisplay }: Props) {
     const handleAnalyze = async () => {
       let completed = false;
       let jobId = '';
+      let buffer = '';
       for await (const text of analyze(location.state.url)) {
-        const events = text.split("\n\n");
+        buffer += text;
+        const events = buffer.split("\n\n");
+        buffer = events.pop() ?? '';
         for(const event of events) {
           const lines = event.split("\n");
 
@@ -46,6 +49,7 @@ export default function AnalyzingView({ repoDisplay }: Props) {
             }
           }
           if (data) {
+            console.log(`${eventName}: ${data}`);
             const payload = JSON.parse(data);
 
             console.log(eventName);
