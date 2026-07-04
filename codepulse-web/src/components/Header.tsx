@@ -66,6 +66,8 @@ const HowLink = styled.span`
 `;
 
 export default function Header() {
+  const today = new Date();
+
   return (
     <Nav>
       <Left>
@@ -74,7 +76,7 @@ export default function Header() {
         <Sub>· 내 코드에 맞는 AI 트렌드 매칭</Sub>
       </Left>
       <Right>
-        <DateLabel>2026. 06. 28 기준</DateLabel>
+        <DateLabel>{today.getFullYear()}. {(today.getMonth() + 1).toString().padStart(2, '0')}. {today.getDate().toString().padStart(2, '0')} 기준</DateLabel>
         <HowLink>작동 방식</HowLink>
       </Right>
     </Nav>
