@@ -175,10 +175,23 @@ def run_gate(repo: RepoContext, trend: TrendItem) -> GateResult:
     strong_reasons = list(dict.fromkeys(strong_reasons))
     weak_reasons = list(dict.fromkeys(weak_reasons))
 
+    # 근거 강도로 점수를 결정적으로 매긴다(LLM의 85 쏠림 방지).
+    #  - 강한 근거(저장소가 실제 쓰는 의존성과 직접 겹침): 85+ 대역.
+    #  - 약한 근거(태그/본문/파일명 겹침)만 있으면: 그 종류 수·태그 겹침 수에 비례
+    #    해 46~82 사이로 분산.
+    if strong_reasons:
+        score = min(98, 84 + 4 * len(strong_reasons) + 2 * len(weak_kinds))
+    else:
+        # 약한 근거는 종류 수(넓이)와 총 근거 수(깊이)로 44~82 사이에 분산시켜,
+        # 같은 '주제만 겹침' 항목들이 모두 같은 점수로 보이지 않게 한다.
+        score = min(82, 44 + 4 * len(weak_kinds) + 5 * len(weak_reasons))
+
     if strong_reasons or len(weak_kinds) >= 2:
         return GateResult(
             gate_result="pass",
             gate_reasons=(strong_reasons + weak_reasons)[:6],
+            score=score,
+            has_strong_dependency=bool(strong_reasons),
         )
 
     fail_reasons = ["저장소 맥락과 트렌드 사이의 구체적인 연결 근거가 부족합니다."]
@@ -187,4 +200,4 @@ def run_gate(repo: RepoContext, trend: TrendItem) -> GateResult:
             "이 트렌드는 저장소별 근거가 없는 일반 AI 시장 뉴스로 보입니다."
         )
 
-    return GateResult(gate_result="fail", gate_reasons=fail_reasons)
+    return GateResult(gate_result="fail", gate_reasons=fail_reasons, score=0)
