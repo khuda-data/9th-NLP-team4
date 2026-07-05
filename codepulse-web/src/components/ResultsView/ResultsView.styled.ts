@@ -15,6 +15,40 @@ export const ResultsHeader = styled.div`
 
 export const HeaderLeft = styled.div``;
 
+export const EmptyState = styled.div`
+  margin-top: 48px;
+  border: 1px solid #ebebeb;
+  border-radius: 20px;
+  padding: 56px 32px;
+  text-align: center;
+  background: #fafafa;
+`;
+
+export const EmptyEmoji = styled.div`
+  font-size: 40px;
+  margin-bottom: 16px;
+`;
+
+export const EmptyTitle = styled.div`
+  font-size: 19px;
+  font-weight: 700;
+  color: #222222;
+  margin-bottom: 12px;
+`;
+
+export const EmptyDesc = styled.p`
+  margin: 0 auto;
+  max-width: 460px;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: #6a6a6a;
+
+  b {
+    color: ${BRAND};
+    font-weight: 600;
+  }
+`;
+
 export const DoneLabel = styled.div`
   font-size: 12.5px;
   font-weight: 700;
