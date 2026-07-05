@@ -105,8 +105,19 @@ def _parse_dependencies(filename: str, text: str) -> list[str]:
         for section in ("dependencies", "devDependencies"):
             deps.extend((data.get(section) or {}).keys())
     elif filename == "pyproject.toml":
-        for match in re.findall(r'"([A-Za-z0-9_.-]+)[^"]*"', text):
-            deps.append(match)
+        # dependencies = [...] 배열(project.dependencies / optional-dependencies /
+        # poetry 등) 안의 문자열만 패키지명으로 취급한다.
+        # 파일 전체의 따옴표 문자열을 긁으면 classifier("MIT License" 등)나
+        # readme = "README.md" 같은 값이 의존성으로 오파싱돼, 게이트에서
+        # "building"/"mit" 같은 흔한 단어가 가짜 강한 매칭을 만든다.
+        for block in re.findall(
+            r'dependencies[^=\[\]]*=\s*\[(.*?)\]', text, flags=re.DOTALL
+        ):
+            for quoted in re.findall(r'"([^"]+)"|\'([^\']+)\'', block):
+                spec = (quoted[0] or quoted[1]).strip()
+                name = re.split(r"[<>=!~;\[ (]", spec, maxsplit=1)[0].strip()
+                if name:
+                    deps.append(name)
     # 중복 제거하되 순서 유지, 상위 40개로 제한.
     seen: set[str] = set()
     unique: list[str] = []
