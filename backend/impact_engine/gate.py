@@ -4,6 +4,17 @@ import re
 from models import GateResult, RepoContext, TrendItem
 
 
+# 언어 이름은 "주제가 겹친다"는 근거로 치지 않는다.
+# (파이썬 레포가 'python' 키워드를 가진 모든 AI 트렌드와 무조건 겹치는 착시 방지)
+LANGUAGE_TAGS = {
+    "python", "javascript", "typescript", "java", "c", "c++", "cpp", "c#",
+    "csharp", "go", "golang", "rust", "ruby", "php", "kotlin", "swift",
+    "scala", "objective-c", "dart", "r", "matlab", "html", "css", "scss",
+    "shell", "bash", "powershell", "dockerfile", "makefile", "cmake",
+    "jupyter notebook", "jupyter", "vue", "svelte",
+}
+
+
 def _normalize(value: str) -> str:
     return value.strip().lower()
 
@@ -100,55 +111,77 @@ def _looks_like_general_ai_news(trend: TrendItem) -> bool:
 
 
 def run_gate(repo: RepoContext, trend: TrendItem) -> GateResult:
-    reasons: list[str] = []
+    """저장소↔트렌드의 연결 근거를 판정한다.
+
+    우연한 단일 매칭(파일명 하나, 흔한 단어 하나)으로 통과해 엉뚱한 추천이
+    생기는 걸 막기 위해, 근거를 강/약으로 나누고 다음일 때만 통과시킨다:
+      - 강한 근거(의존성 레벨 매칭)가 1개 이상, 또는
+      - 서로 다른 종류의 약한 근거가 2개 이상.
+    """
     trend_text = _trend_text(trend)
     repo_text = _repo_text(repo)
 
     repo_meta_tags = _normalized_set(repo.meta_tags)
+    repo_dependencies = _normalized_set(repo.dependencies)
     task_tags = _normalized_set(trend.task_tags)
     impact_tags = _normalized_set(trend.impact_tags)
     keyword_tags = _normalized_set(trend.keyword_tags)
-
-    task_overlap = repo_meta_tags.intersection(task_tags)
-    impact_overlap = repo_meta_tags.intersection(impact_tags)
-    keyword_overlap = repo_meta_tags.intersection(keyword_tags)
-    for tag in sorted(task_overlap):
-        reasons.append(f"저장소 meta_tags와 트렌드 task_tags가 겹칩니다: {tag}")
-    for tag in sorted(impact_overlap):
-        reasons.append(f"저장소 meta_tags와 트렌드 impact_tags가 겹칩니다: {tag}")
-    for tag in sorted(keyword_overlap):
-        reasons.append(f"저장소 meta_tags와 트렌드 keyword_tags가 겹칩니다: {tag}")
-
-    repo_dependencies = _normalized_set(repo.dependencies)
     dependency_tags = _normalized_set(trend.dependency_tags)
+
+    strong_reasons: list[str] = []
+    weak_reasons: list[str] = []
+    weak_kinds: set[str] = set()
+
+    # === 강한 근거: 의존성 레벨 ===
     for dependency in sorted(repo_dependencies.intersection(dependency_tags)):
-        reasons.append(
+        strong_reasons.append(
             f"저장소 dependency와 트렌드 dependency_tags가 겹칩니다: {dependency}"
         )
-
     for dependency in sorted(repo_dependencies):
-        if _contains_term(trend_text, dependency):
-            reasons.append(f"저장소 dependency가 트렌드 내용에 등장합니다: {dependency}")
-
-    core_tags = task_tags.union(dependency_tags, impact_tags, keyword_tags)
-    for tag in sorted(core_tags):
-        if _contains_term(repo_text, tag):
-            reasons.append(
-                f"트렌드 태그가 저장소 README 또는 code_context에 등장합니다: {tag}"
+        # 2글자 이하 의존성명은 흔한 단어와 충돌하므로 제외.
+        if len(dependency) >= 3 and _contains_term(trend_text, dependency):
+            strong_reasons.append(
+                f"저장소 dependency가 트렌드 내용에 등장합니다: {dependency}"
             )
 
+    # === 약한 근거 1: meta_tags ↔ 트렌드 태그(언어 이름 제외) ===
+    tag_overlap = (
+        repo_meta_tags.intersection(task_tags | impact_tags | keyword_tags)
+        - LANGUAGE_TAGS
+    )
+    for tag in sorted(tag_overlap):
+        weak_reasons.append(f"저장소 meta_tags와 트렌드 태그가 겹칩니다: {tag}")
+        weak_kinds.add("tag")
+
+    # === 약한 근거 2: 구체적 트렌드 태그가 README/code_context에 등장 ===
+    specific_tags = (
+        task_tags | dependency_tags | impact_tags | keyword_tags
+    ) - LANGUAGE_TAGS
+    for tag in sorted(specific_tags):
+        # 4글자 미만의 짧은 태그는 흔한 단어와 충돌하므로 본문 매칭에서 제외.
+        if len(tag) >= 4 and _contains_term(repo_text, tag):
+            weak_reasons.append(
+                f"트렌드 태그가 저장소 README 또는 code_context에 등장합니다: {tag}"
+            )
+            weak_kinds.add("text")
+
+    # === 약한 근거 3: file_tree 파일명 매칭 (단독 통과 불가, 보강 신호로만) ===
     for file_path in repo.file_tree:
         reason = _related_file_reason(file_path, trend_text)
         if reason:
-            reasons.append(reason)
+            weak_reasons.append(reason)
+            weak_kinds.add("file")
 
-    # Keep the gate deterministic and concise.
-    reasons = list(dict.fromkeys(reasons))
+    strong_reasons = list(dict.fromkeys(strong_reasons))
+    weak_reasons = list(dict.fromkeys(weak_reasons))
 
-    if reasons:
-        return GateResult(gate_result="pass", gate_reasons=reasons)
+    if strong_reasons or len(weak_kinds) >= 2:
+        return GateResult(
+            gate_result="pass",
+            gate_reasons=(strong_reasons + weak_reasons)[:6],
+        )
 
-    fail_reasons = ["저장소 맥락과 트렌드 태그 사이의 구체적인 연결 근거를 찾지 못했습니다."]
+    fail_reasons = ["저장소 맥락과 트렌드 사이의 구체적인 연결 근거가 부족합니다."]
     if _looks_like_general_ai_news(trend):
         fail_reasons.append(
             "이 트렌드는 저장소별 근거가 없는 일반 AI 시장 뉴스로 보입니다."

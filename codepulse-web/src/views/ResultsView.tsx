@@ -3,6 +3,7 @@ import TrendCard from '../components/TrendCard';
 import {
   Section, ResultsHeader, HeaderLeft, DoneLabel, RepoTitle, DateSub, ResetBtn,
   SummaryBar, SummaryText, Highlight, SummaryDots, DotItem, Dot, FilterRow, CardsList,
+  EmptyState, EmptyEmoji, EmptyTitle, EmptyDesc,
 } from '../components/ResultsView/ResultsView.styled';
 import { CATS, CatKey, FilterKey } from '../data';
 import { useLocation } from 'react-router-dom';
@@ -52,9 +53,36 @@ export default function ResultsView({
   const result = location.state.result;
   console.log(result);
 
-  const visibleCards = result["results"]
+  const allResults = result["results"] ?? [];
+  const visibleCards = allResults
     .filter((d:IResult) => filter === 'all' || d.category === filter)
     .sort((a:any, b:any) => b.relevanceScore - a.relevanceScore);
+
+  if (allResults.length === 0) {
+    return (
+      <Section>
+        <ResultsHeader>
+          <HeaderLeft>
+            <DoneLabel>분석 완료</DoneLabel>
+            <RepoTitle>{result["repoFullName"]}</RepoTitle>
+            <DateSub>{result["analyzedAt"].split("T")[0]} 트렌드 기준 분석</DateSub>
+          </HeaderLeft>
+          <ResetBtn onClick={onReset}>다시 분석</ResetBtn>
+        </ResultsHeader>
+
+        <EmptyState>
+          <EmptyEmoji>🔍</EmptyEmoji>
+          <EmptyTitle>이 레포와 맞닿은 오늘의 트렌드가 없어요</EmptyTitle>
+          <EmptyDesc>
+            CodePulse는 오늘 수집한 AI 트렌드 중 <b>이 코드와 직접 연관된 것만</b> 골라
+            보여드려요. 지금은 이 레포에 해당하는 게 없네요.
+            <br />
+            AI·ML 성격의 레포(예: LLM·RAG·에이전트 프로젝트)로 시도하면 결과가 더 잘 나와요.
+          </EmptyDesc>
+        </EmptyState>
+      </Section>
+    );
+  }
 
   return (
     <Section>
