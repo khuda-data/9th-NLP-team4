@@ -8,6 +8,7 @@ from .models import PipelineState
 from .normalizer import normalize_raw
 from .quality import quality_report
 from .schema import is_valid_trend
+from .tagging import is_actionable
 from .storage import write_chroma_or_jsonl, write_json
 
 
@@ -39,6 +40,17 @@ def weak_labeling_node(state: PipelineState) -> PipelineState:
     # Labels are assigned during normalization. This node remains explicit so it
     # can later branch to LLM-only repair for low-confidence items if the team agrees.
     state.labeled_trends = state.normalized_trends
+    return state
+
+
+def relevance_filter_node(state: PipelineState) -> PipelineState:
+    # 코드↔트렌드 대조에 쓸 수 없는 순수 정책/시장/사건 뉴스(태그가 전혀 안 붙는
+    # 항목)를 제거해, 도구/라이브러리/기법 중심의 실행 가능한 트렌드만 남긴다.
+    before = len(state.labeled_trends)
+    state.labeled_trends = [t for t in state.labeled_trends if is_actionable(t)]
+    dropped = before - len(state.labeled_trends)
+    if dropped:
+        state.errors.append(f"relevance filter dropped {dropped} non-actionable trends")
     return state
 
 
@@ -87,6 +99,7 @@ def run_sequential(
     state = collector_node(state, limit_per_source)
     state = normalizer_node(state)
     state = weak_labeling_node(state)
+    state = relevance_filter_node(state)
     state = semantic_dedup_node(state)
     state = ingestion_node(state, output_dir)
     state = quality_check_node(state)
@@ -125,6 +138,7 @@ def build_langgraph(
     graph.add_node("collector", collect_with_config)
     graph.add_node("normalizer", normalizer_node)
     graph.add_node("weak_labeling", weak_labeling_node)
+    graph.add_node("relevance_filter", relevance_filter_node)
     graph.add_node("semantic_dedup", semantic_dedup_node)
     graph.add_node("ingestion", ingest_with_config)
     graph.add_node("quality_check", quality_check_node)
@@ -132,7 +146,8 @@ def build_langgraph(
     graph.set_entry_point("collector")
     graph.add_edge("collector", "normalizer")
     graph.add_edge("normalizer", "weak_labeling")
-    graph.add_edge("weak_labeling", "semantic_dedup")
+    graph.add_edge("weak_labeling", "relevance_filter")
+    graph.add_edge("relevance_filter", "semantic_dedup")
     graph.add_edge("semantic_dedup", "ingestion")
     graph.add_edge("ingestion", "quality_check")
     graph.add_conditional_edges("quality_check", should_repair, {"repair": "repair", "done": END})
