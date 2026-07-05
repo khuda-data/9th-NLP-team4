@@ -50,11 +50,34 @@ export const HeroP = styled.p`
   }
 `;
 
+export const ModeTabs = styled.div`
+  display: inline-flex;
+  gap: 4px;
+  margin-top: 34px;
+  padding: 4px;
+  background: #f2f2f2;
+  border-radius: 9999px;
+`;
+
+export const ModeTab = styled.button<{ $active?: boolean }>`
+  border: none;
+  border-radius: 9999px;
+  padding: 8px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  background: ${({ $active }) => ($active ? '#ffffff' : 'transparent')};
+  color: ${({ $active }) => ($active ? '#222222' : '#8a8a8a')};
+  box-shadow: ${({ $active }) => ($active ? 'rgba(0,0,0,0.08) 0 1px 3px' : 'none')};
+  transition: background 0.15s, color 0.15s;
+`;
+
 export const SearchPill = styled.div`
   display: flex;
   align-items: center;
   max-width: 780px;
-  margin-top: 36px;
+  margin-top: 14px;
   background: #ffffff;
   border: 1px solid #dddddd;
   border-radius: 9999px;

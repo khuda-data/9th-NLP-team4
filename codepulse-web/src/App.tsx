@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Header from './components/Header';
 import InputView from './views/InputView';
+import RepoSelectView from './views/RepoSelectView';
 import AnalyzingView from './views/AnalyzingView';
 import ResultsView from './views/ResultsView';
 import { FilterKey } from './data';
@@ -24,6 +25,7 @@ const Main = styled.main`
 function AppRoutes() {
   const navigate = useNavigate();
   const [repoUrl, setRepoUrl]     = useState('');
+  const [githubId, setGithubId]   = useState('');
   const [apiKey, setApiKey]       = useState('');
   const [stepIndex, setStepIndex] = useState(-1);
   const [filter, setFilter]       = useState<FilterKey>('all');
@@ -55,12 +57,18 @@ function AppRoutes() {
         element={
           <InputView
             repoUrl={repoUrl}
+            githubId={githubId}
             apiKey={apiKey}
             onRepoChange={setRepoUrl}
+            onGithubIdChange={setGithubId}
             onKeyChange={setApiKey}
             onFillSample={fillSample}
           />
         }
+      />
+      <Route
+        path="/repos"
+        element={<RepoSelectView onRepoChange={setRepoUrl} />}
       />
       <Route
         path="/analyzing"

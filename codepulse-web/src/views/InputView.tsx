@@ -1,19 +1,22 @@
-import { KeyboardEvent } from 'react';
+import { KeyboardEvent, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CategoryBadge from '../components/CategoryBadge';
 import {
-  Section, BadgePill, BadgeDot, HeroH1, HeroP, SearchPill, FieldLabel, InputLabel,
-  SearchInput, SearchBtn, InputMeta, FillBtn, SourcesRow, SourcesLabel,
-  SourcesDivider, SourcesChips, SourceChip, Taxonomy, TaxonomyTitle, TaxonomyGrid,
-  TaxonomyCard, TaxonomyDesc,
+  Section, BadgePill, BadgeDot, HeroH1, HeroP, ModeTabs, ModeTab, SearchPill,
+  FieldLabel, InputLabel, SearchInput, SearchBtn, InputMeta, FillBtn, KeyNote,
+  SourcesRow, SourcesLabel, SourcesDivider, SourcesChips, SourceChip, Taxonomy,
+  TaxonomyTitle, TaxonomyGrid, TaxonomyCard, TaxonomyDesc,
 } from '../components/InputView/InputView.styled';
 import { CATS, CatKey } from '../data';
-import { useEffect } from 'react';
+
+type Mode = 'id' | 'url';
 
 interface Props {
   repoUrl: string;
+  githubId: string;
   apiKey: string;
   onRepoChange: (val: string) => void;
+  onGithubIdChange: (val: string) => void;
   onKeyChange: (val: string) => void;
   onFillSample: () => void;
 }
@@ -30,19 +33,27 @@ const TAXONOMY_ITEMS: TaxonomyItem[] = [
 ];
 
 export default function InputView({
-  onFillSample, repoUrl, onRepoChange
+  onFillSample, repoUrl, githubId, onRepoChange, onGithubIdChange,
 }: Props) {
   const navigate = useNavigate();
+  const [mode, setMode] = useState<Mode>('id');
+
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') onClick();
   };
   const onClick = () => {
-    if(repoUrl == '' || !repoUrl) alert('레포지토리 url을 입력해주세요.');
-    else navigate('/analyzing', {state: {url: repoUrl}});
-  }
+    if (mode === 'url') {
+      if (repoUrl.trim() === '') alert('레포지토리 url을 입력해주세요.');
+      else navigate('/analyzing', { state: { url: repoUrl } });
+    } else {
+      if (githubId.trim() === '') alert('GitHub 아이디를 입력해주세요.');
+      else navigate('/repos', { state: { username: githubId.trim() } });
+    }
+  };
   useEffect(() => {
     onRepoChange('');
-  }, [])
+    onGithubIdChange('');
+  }, []);
 
   return (
     <Section>
@@ -53,23 +64,42 @@ export default function InputView({
 
       <HeroH1>내 코드에 의미 있는 <br />AI 트렌드만, 오늘 단위로.</HeroH1>
       <HeroP>
-        레포 주소만 넣으면 오늘 나온 트렌드 중 당신의 코드와 맞닿은 것만 골라{' '}
-        <b>대체후보 · 신규적용 · 영향</b>으로 분류해 드려요.
+        GitHub 아이디만 넣으면 레포 목록에서 하나를 골라, 오늘 나온 트렌드 중 그 코드와
+        맞닿은 것만 <b>대체후보 · 신규적용 · 영향</b>으로 분류해 드려요.
       </HeroP>
 
+      <ModeTabs>
+        <ModeTab $active={mode === 'id'} onClick={() => setMode('id')}>GitHub 아이디</ModeTab>
+        <ModeTab $active={mode === 'url'} onClick={() => setMode('url')}>레포 URL 직접 입력</ModeTab>
+      </ModeTabs>
+
       <SearchPill>
-        <FieldLabel>
-          <InputLabel>GitHub 레포</InputLabel>
-          <SearchInput
-            value={repoUrl}
-            onChange={e => onRepoChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="github.com/your-org/your-repo"
-            autoComplete="off"
-            spellCheck={false}
-          />
-        </FieldLabel>
-        <SearchBtn onClick={onClick} aria-label="분석">
+        {mode === 'id' ? (
+          <FieldLabel>
+            <InputLabel>GitHub 아이디</InputLabel>
+            <SearchInput
+              value={githubId}
+              onChange={e => onGithubIdChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="your-github-id"
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </FieldLabel>
+        ) : (
+          <FieldLabel>
+            <InputLabel>GitHub 레포</InputLabel>
+            <SearchInput
+              value={repoUrl}
+              onChange={e => onRepoChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="github.com/your-org/your-repo"
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </FieldLabel>
+        )}
+        <SearchBtn onClick={onClick} aria-label={mode === 'id' ? '레포 불러오기' : '분석'}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <circle cx="11" cy="11" r="7" stroke="#fff" strokeWidth="2" />
             <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
@@ -78,7 +108,8 @@ export default function InputView({
       </SearchPill>
 
       <InputMeta>
-        <FillBtn onClick={onFillSample}>예시 레포로 채우기</FillBtn>
+        {mode === 'url' && <FillBtn onClick={onFillSample}>예시 레포로 채우기</FillBtn>}
+        {mode === 'id' && <KeyNote>입력한 아이디의 공개 레포만 GitHub에서 불러와요.</KeyNote>}
       </InputMeta>
 
       <SourcesRow>

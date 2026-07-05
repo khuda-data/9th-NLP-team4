@@ -6,8 +6,6 @@ import {
 } from '../components/ResultsView/ResultsView.styled';
 import { CATS, CatKey, FilterKey } from '../data';
 import { useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
-import { getResults } from '../utils/getResults';
 
 interface Props {
   repoDisplay: string;
