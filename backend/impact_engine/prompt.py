@@ -41,17 +41,38 @@ Trend Item:
 Rule Gate:
 {json.dumps(gate_json, ensure_ascii=False, indent=2)}
 
-Classification definitions:
-- impact: The trend affects a library, API, model, framework, or tool directly used in the repo.
-- replacement_candidate: The trend can improve or replace a method/tool currently used in the repo.
-- new_application: The trend is not currently used but is strongly applicable to the repo goal.
-- exclude: The trend has weak evidence or no actionable meaning for this repo.
+Classification decision (evaluate in order; choose the FIRST that matches):
+1. impact (영향): The trend is specifically ABOUT a library, framework, model, or
+   tool that appears in repo.dependencies OR that a Rule Gate "dependency" reason
+   names. The repo ALREADY uses the exact thing the trend is about. If the trend
+   does not concern something the repo actually depends on, it is NOT impact.
+2. replacement_candidate (대체후보): The repo already does something in this area,
+   and the trend is a concrete method/tool that could replace or measurably
+   improve it (e.g. the repo does retrieval and the trend is a stronger reranker).
+   The trend's specific tool is not yet a dependency.
+3. new_application (신규적용): The repo does not currently do this, but the trend
+   is a concrete, applicable technique/tool for the repo's stated goal.
+4. exclude (제외): Only generic topic/keyword overlap, or no actionable meaning
+   for THIS repo. When evidence is weak, choose exclude.
 
-Scoring rubric:
-- 85~100: Strong repo evidence and specific actionable next steps.
-- 70~84: Clearly relevant and worth showing to the user.
-- 50~69: Somewhat related but evidence or actions are weak.
-- 0~49: Not relevant or not worth showing.
+Most trends that merely share a topic (e.g. "agent", "RAG", "LLM") with the repo
+but do not concern a dependency the repo actually uses are new_application or
+exclude — they are NOT impact.
+
+Scoring rubric — score how DIRECT and SPECIFIC the connection to THIS repo is,
+and spread scores across the range. Do not default every card to the same number.
+- 85-100: A Rule Gate "dependency" reason fired, i.e. the trend concerns a
+  library/tool that is actually in repo.dependencies, AND there is a concrete next
+  step. Reserve this band for direct hits on the repo's own stack.
+- 70-84: Clearly relevant to what the repo does, with specific repo evidence, but
+  the trend's exact tool/library is not a current dependency.
+- 50-69: Related in topic, but the evidence is only tag/text/file-name overlap;
+  usefulness is plausible, not certain.
+- 0-49: Weak or generic overlap only; not worth showing (use exclude).
+Judge each trend on its own evidence. Two trends should not receive the same
+score unless their evidence for THIS repo is genuinely equivalent. Only a small
+number of trends deserve 85+; if you are about to give most cards the same high
+score, re-check the classification and lower the ones without a dependency match.
 
 Output requirements:
 - Return valid JSON only.

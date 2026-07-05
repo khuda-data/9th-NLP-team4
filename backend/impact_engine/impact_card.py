@@ -115,6 +115,43 @@ def normalize_impact_card(card_dict: dict[str, Any], trend_id: str) -> ImpactCar
     )
 
 
+def _apply_gate_signal(card: ImpactCard, gate: "GateResult") -> ImpactCard:
+    """LLM 결과에 게이트의 결정적 신호를 반영한다.
+
+    - 관련도 점수는 근거 강도로 계산한 gate.score 를 사용한다(LLM의 85 쏠림 방지).
+    - '영향(impact)'은 저장소가 실제로 쓰는 의존성과 직접 겹칠 때만 인정한다.
+      강한 의존성 근거가 없는데 LLM이 impact라 하면 '신규적용'으로 낮춘다.
+    - 바뀐 점수/분류에 맞춰 노출 여부(display_decision)를 다시 계산한다.
+    """
+    classification = card.classification
+    if classification == "impact" and not gate.has_strong_dependency:
+        classification = "new_application"
+
+    score = gate.score
+
+    if classification == "exclude":
+        display_decision = "hide"
+    elif score >= 70:
+        display_decision = "show"
+    elif score >= 50:
+        display_decision = "candidate"
+    else:
+        display_decision = "hide"
+    if not card.evidence:
+        display_decision = "hide"
+    if display_decision == "show" and not card.next_actions:
+        display_decision = "candidate"
+
+    return card.model_copy(
+        update={
+            "classification": classification,
+            "classification_label": CLASSIFICATION_LABELS[classification],
+            "relevance_score": score,
+            "display_decision": display_decision,
+        }
+    )
+
+
 async def create_impact_card(
     repo: RepoContext,
     trend: TrendItem,
@@ -140,7 +177,8 @@ async def create_impact_card(
     try:
         llm_text = await call_llm(prompt, api_key=api_key)
         card_dict = extract_json(llm_text)
-        return normalize_impact_card(card_dict, trend.trend_id)
+        card = normalize_impact_card(card_dict, trend.trend_id)
+        return _apply_gate_signal(card, gate)
     except LLM_FAILURE_ERRORS as exc:
         if not suppress_llm_errors:
             raise
