@@ -41,7 +41,7 @@ export const CATS: Record<CatKey, CatConfig> = {
 };
 
 export const STEPS: StepConfig[] = [
-  { n: '1', label: '레포 클론',           sub: 'git clone' },
+  { n: '1', label: '레포 정보 수집',      sub: 'GitHub API' },
   { n: '2', label: '트렌드 수집',         sub: 'arXiv · Hacker News · GitHub' },
   { n: '3', label: '코드 ↔ 트렌드 대조',  sub: 'Google Gemini' },
   { n: '4', label: '분류 결과 생성',       sub: '대체후보 · 신규적용 · 영향' },
