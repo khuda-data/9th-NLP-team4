@@ -329,6 +329,8 @@ def build_completed_result(
         key=lambda result: result["relevanceScore"],
         reverse=True,
     )
+    # 약한 주제 겹침까지 모두 노출하면 노이즈가 크므로 관련도 상위 N개만 보여준다.
+    visible_results = visible_results[:_MAX_RESULTS]
     count_by_category = {
         "replace": sum(
             1 for result in visible_results if result["category"] == "replace"
@@ -378,6 +380,8 @@ def classify_analyze_exception(exc: Exception) -> str:
 # 이를 직렬로 await 하면 호출 수만큼 지연이 누적되므로, 동시에 실행하되
 # 레이트리밋을 넘지 않도록 동시 실행 수를 제한한다.
 _IMPACT_CONCURRENCY = int(os.getenv("IMPACT_CONCURRENCY", "8"))
+# 결과로 노출할 최대 트렌드 수(관련도 상위 N개).
+_MAX_RESULTS = int(os.getenv("MAX_RESULTS", "12"))
 
 
 async def run_impact_analysis(

@@ -53,6 +53,11 @@ class ImpactBatchRequest(BaseModel):
 class GateResult(BaseModel):
     gate_result: Literal["pass", "fail"]
     gate_reasons: list[str] = Field(default_factory=list)
+    # 근거 강도로 산출한 결정적 관련도 점수(0-100). 강한 의존성 매칭이 있으면
+    # 높고, 약한 태그/본문 겹침만 있으면 낮다. LLM의 들쭉날쭉한 점수 대신 사용.
+    score: int = 0
+    # 저장소가 실제로 쓰는 의존성과 트렌드가 직접 겹쳤는지(=강한 근거) 여부.
+    has_strong_dependency: bool = False
 
 
 class ImpactCard(BaseModel):
