@@ -108,8 +108,7 @@ export default function AnalyzingView({ repoDisplay }: Props) {
           />
         ))}
       </StepsList>
-
-      <Note>공개 트렌드 API와 입력하신 Gemini 키로 처리됩니다.</Note>
+      <Note>공개 트렌드 API와 llm의 분석으로 처리됩니다.</Note>
     </Section>
   );
 }

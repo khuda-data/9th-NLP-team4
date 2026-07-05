@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import CategoryBadge from '../components/CategoryBadge';
 import {
   Section, BadgePill, BadgeDot, HeroH1, HeroP, SearchPill, FieldLabel, InputLabel,
-  SearchInput, SearchBtn, InputMeta, FillBtn, KeyNote, SourcesRow, SourcesLabel,
+  SearchInput, SearchBtn, InputMeta, FillBtn, SourcesRow, SourcesLabel,
   SourcesDivider, SourcesChips, SourceChip, Taxonomy, TaxonomyTitle, TaxonomyGrid,
   TaxonomyCard, TaxonomyDesc,
 } from '../components/InputView/InputView.styled';
 import { CATS, CatKey } from '../data';
+import { useEffect } from 'react';
 
 interface Props {
   repoUrl: string;
@@ -39,6 +40,9 @@ export default function InputView({
     if(repoUrl == '' || !repoUrl) alert('레포지토리 url을 입력해주세요.');
     else navigate('/analyzing', {state: {url: repoUrl}});
   }
+  useEffect(() => {
+    onRepoChange('');
+  }, [])
 
   return (
     <Section>
@@ -47,7 +51,7 @@ export default function InputView({
         GitHub 레포 × 오늘의 AI 트렌드
       </BadgePill>
 
-      <HeroH1>내 코드에 의미 있는 AI 트렌드만, 오늘 단위로.</HeroH1>
+      <HeroH1>내 코드에 의미 있는 <br />AI 트렌드만, 오늘 단위로.</HeroH1>
       <HeroP>
         레포 주소만 넣으면 오늘 나온 트렌드 중 당신의 코드와 맞닿은 것만 골라{' '}
         <b>대체후보 · 신규적용 · 영향</b>으로 분류해 드려요.
@@ -75,7 +79,6 @@ export default function InputView({
 
       <InputMeta>
         <FillBtn onClick={onFillSample}>예시 레포로 채우기</FillBtn>
-        <KeyNote>키는 브라우저에서만 쓰이고 저장되지 않아요.</KeyNote>
       </InputMeta>
 
       <SourcesRow>
