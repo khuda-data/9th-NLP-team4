@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import re
@@ -373,18 +374,27 @@ def classify_analyze_exception(exc: Exception) -> str:
     return "INTERNAL_ERROR"
 
 
+# 트렌드가 늘어나면(수십 개) 게이트 통과분마다 실제 LLM 호출이 붙는다.
+# 이를 직렬로 await 하면 호출 수만큼 지연이 누적되므로, 동시에 실행하되
+# 레이트리밋을 넘지 않도록 동시 실행 수를 제한한다.
+_IMPACT_CONCURRENCY = int(os.getenv("IMPACT_CONCURRENCY", "8"))
+
+
 async def run_impact_analysis(
     repo: RepoContext,
     trends: list[TrendItem],
 ) -> list[dict[str, Any]]:
-    results: list[dict[str, Any]] = []
-    for trend in trends:
-        card = await create_impact_card(
-            repo,
-            trend,
-            suppress_llm_errors=False,
-        )
-        result = impact_card_to_result(card, trend)
-        if result is not None:
-            results.append(result)
-    return results
+    semaphore = asyncio.Semaphore(max(1, _IMPACT_CONCURRENCY))
+
+    async def analyze_one(trend: TrendItem) -> dict[str, Any] | None:
+        async with semaphore:
+            card = await create_impact_card(
+                repo,
+                trend,
+                suppress_llm_errors=False,
+            )
+        return impact_card_to_result(card, trend)
+
+    cards = await asyncio.gather(*(analyze_one(trend) for trend in trends))
+    # gather는 입력 순서를 보존하므로 트렌드 순서가 유지된다.
+    return [result for result in cards if result is not None]
