@@ -1,5 +1,6 @@
-from pathlib import Path
+import math
 import re
+from pathlib import Path
 
 from models import GateResult, RepoContext, TrendItem
 
@@ -35,6 +36,38 @@ def _contains_term(text: str, term: str) -> bool:
     compact_term = term.replace("-", "").replace("_", "")
     compact_text = text.replace("-", "").replace("_", "")
     return term in text or compact_term in compact_text
+
+
+# 의존성 파일에 섞여 들어오는 패키징/문서 잡음. 이런 이름은 트렌드 본문과의
+# 매칭 근거로 쓰지 않는다. ("mit"이 "submitted"에 걸리는 식의 오탐 방지)
+PACKAGING_NOISE = {
+    "setuptools", "wheel", "pip", "hatchling", "hatchling.build", "poetry",
+    "poetry-core", "flit", "flit_core", "build", "twine", "readme", "readme.md",
+    "license", "mit", "src", "test", "tests", "docs", "main",
+}
+
+
+def _contains_dependency(text: str, dep: str) -> bool:
+    """의존성명이 트렌드 본문에 '단어'로 등장하는지 판정한다.
+
+    _contains_term의 부분문자열 매칭은 "mit" ⊂ "submitted" 같은 오탐을 내므로,
+    의존성(강한 근거)에는 단어 경계를 요구한다. 하이픈/언더스코어 표기 차이는
+    구분자 제거(compact) 후 같은 경계 규칙으로 흡수한다.
+    """
+    dep = _normalize(dep)
+    if len(dep) < 3 or dep in PACKAGING_NOISE or dep in LANGUAGE_TAGS:
+        return False
+
+    text = _normalize(text)
+    boundary = r"(?<![a-z0-9]){}(?![a-z0-9])"
+    if re.search(boundary.format(re.escape(dep)), text):
+        return True
+
+    compact_dep = dep.replace("-", "").replace("_", "").replace(".", "")
+    if compact_dep != dep and len(compact_dep) >= 4:
+        compact_text = text.replace("-", "").replace("_", "").replace(".", "")
+        return re.search(boundary.format(re.escape(compact_dep)), compact_text) is not None
+    return False
 
 
 def _trend_text(trend: TrendItem) -> str:
@@ -138,8 +171,7 @@ def run_gate(repo: RepoContext, trend: TrendItem) -> GateResult:
             f"저장소 dependency와 트렌드 dependency_tags가 겹칩니다: {dependency}"
         )
     for dependency in sorted(repo_dependencies):
-        # 2글자 이하 의존성명은 흔한 단어와 충돌하므로 제외.
-        if len(dependency) >= 3 and _contains_term(trend_text, dependency):
+        if _contains_dependency(trend_text, dependency):
             strong_reasons.append(
                 f"저장소 dependency가 트렌드 내용에 등장합니다: {dependency}"
             )
@@ -179,12 +211,18 @@ def run_gate(repo: RepoContext, trend: TrendItem) -> GateResult:
     #  - 강한 근거(저장소가 실제 쓰는 의존성과 직접 겹침): 85+ 대역.
     #  - 약한 근거(태그/본문/파일명 겹침)만 있으면: 그 종류 수·태그 겹침 수에 비례
     #    해 46~82 사이로 분산.
+    # 같은 근거 강도라면 트렌드 자체의 주목도(GitHub 스타·HN 포인트)로 0~6점을
+    # 가산해 미세하게 차등을 준다. 최소 근거(약한 2종)만 가진 항목들이 전부
+    # 같은 점수로 벽을 이루는 것을 막는다.
+    source_score = float((trend.metadata and trend.metadata.source_score) or 0)
+    popularity_bonus = min(6, int(math.log10(source_score + 1) * 1.5))
+
     if strong_reasons:
         score = min(98, 84 + 4 * len(strong_reasons) + 2 * len(weak_kinds))
     else:
         # 약한 근거는 종류 수(넓이)와 총 근거 수(깊이)로 44~82 사이에 분산시켜,
         # 같은 '주제만 겹침' 항목들이 모두 같은 점수로 보이지 않게 한다.
-        score = min(82, 44 + 4 * len(weak_kinds) + 5 * len(weak_reasons))
+        score = min(82, 44 + 4 * len(weak_kinds) + 5 * len(weak_reasons) + popularity_bonus)
 
     if strong_reasons or len(weak_kinds) >= 2:
         return GateResult(
