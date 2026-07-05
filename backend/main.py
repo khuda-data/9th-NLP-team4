@@ -2,10 +2,15 @@ import json
 import os
 from collections.abc import AsyncIterator
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
+
+# 로컬 실행 시 backend/.env 를 읽어 os.environ 에 채운다.
+# (배포 환경엔 .env 파일이 없고 env는 대시보드로 주입되므로 no-op)
+load_dotenv()
 
 from analyze_models import AnalyzeRequest
 from analyze_service import (
@@ -14,6 +19,7 @@ from analyze_service import (
     build_repo_context_from_url,
     classify_analyze_exception,
     error_payload,
+    fetch_user_repos,
     load_trends,
     make_job_id,
     normalize_repo_full_name,
@@ -69,6 +75,17 @@ async def validation_exception_handler(
 @app.get("/health")
 async def health() -> dict[str, str | bool]:
     return {"status": "ok", "use_fake_llm": _env_flag("USE_FAKE_LLM", default=True)}
+
+
+@app.get("/github/users/{username}/repos", response_model=None)
+async def github_user_repos(username: str) -> JSONResponse:
+    # 프론트의 레포 목록 조회를 서버 토큰(GITHUB_TOKEN)으로 프록시한다.
+    # 인증 시 GitHub rate limit이 60/h → 5000/h 로 올라가고 토큰은 브라우저에 노출되지 않는다.
+    try:
+        repos = await fetch_user_repos(username)
+    except AnalyzeError as exc:
+        return _error_response(exc.code, exc.status_code)
+    return JSONResponse(content=repos)
 
 
 @app.post("/api/impact", response_model=ImpactCard)

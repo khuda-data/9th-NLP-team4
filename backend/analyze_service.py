@@ -23,6 +23,8 @@ ERROR_MESSAGES = {
     "JOB_NOT_FOUND": "요청한 분석 작업을 찾을 수 없습니다.",
     "GEMINI_ERROR": "Gemini 호출 중 오류가 발생했습니다.",
     "INTERNAL_ERROR": "분석 중 오류가 발생했습니다.",
+    "GITHUB_USER_NOT_FOUND": "해당 GitHub 사용자를 찾을 수 없습니다.",
+    "GITHUB_RATE_LIMIT": "GitHub API 호출 한도를 초과했습니다. 잠시 후 다시 시도하세요.",
 }
 
 
@@ -224,6 +226,40 @@ def build_repo_context_from_url(repo_url: str) -> RepoContext:
     repo_data["repo_name"] = repo_full_name
     repo_data["repo_url"] = repo_url.strip()
     return RepoContext.model_validate(repo_data)
+
+
+async def fetch_user_repos(username: str) -> list[dict[str, Any]]:
+    """GitHub 사용자의 공개 레포 목록을 최근 업데이트순으로 조회한다.
+
+    서버 측 GITHUB_TOKEN(있으면)으로 인증해 rate limit을 완화한다.
+    실패는 AnalyzeError로 올려 엔드포인트에서 에러 응답으로 변환한다.
+    """
+    user = username.strip().lstrip("@")
+    if not user:
+        raise AnalyzeError("GITHUB_USER_NOT_FOUND", 404)
+
+    try:
+        async with httpx.AsyncClient(
+            timeout=8.0, headers=_github_headers(), follow_redirects=True
+        ) as client:
+            resp = await client.get(
+                f"{GITHUB_API}/users/{user}/repos",
+                params={"sort": "updated", "per_page": "100"},
+            )
+    except httpx.HTTPError as exc:
+        raise AnalyzeError("INTERNAL_ERROR", 500) from exc
+
+    if resp.status_code == 404:
+        raise AnalyzeError("GITHUB_USER_NOT_FOUND", 404)
+    if resp.status_code in (403, 429):
+        raise AnalyzeError("GITHUB_RATE_LIMIT", 403)
+    if resp.status_code != 200:
+        raise AnalyzeError("INTERNAL_ERROR", 500)
+
+    data = resp.json()
+    if not isinstance(data, list):
+        raise AnalyzeError("INTERNAL_ERROR", 500)
+    return data
 
 
 def load_trends() -> list[TrendItem]:
