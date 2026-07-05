@@ -21,3 +21,6 @@ services:
       # 실제 키는 대시보드에서 직접 입력(리포에 커밋 금지)
       - key: OPENAI_API_KEY
         sync: false
+      # GitHub 레포 목록 조회 프록시용 토큰(rate limit 60→5000/h). 대시보드에서 입력.
+      - key: GITHUB_TOKEN
+        sync: false

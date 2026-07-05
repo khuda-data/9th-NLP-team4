@@ -20,8 +20,9 @@ export class FetchReposError extends Error {
 }
 
 /**
- * GitHub 공개 API로 해당 유저의 공개 레포 목록을 최근 업데이트순으로 가져온다.
- * 인증 없이 호출하면 시간당 60회 제한이 있으므로 403(rate limit)을 별도 처리한다.
+ * 백엔드 프록시(/github/users/{id}/repos)를 통해 해당 유저의 공개 레포 목록을
+ * 최근 업데이트순으로 가져온다. 프록시가 서버 측 GITHUB_TOKEN으로 인증하므로
+ * rate limit(60→5000/h)이 완화되고 토큰이 브라우저에 노출되지 않는다.
  */
 export async function fetchRepos(username: string): Promise<GithubRepo[]> {
   const user = username.trim().replace(/^@/, '');
@@ -32,8 +33,8 @@ export async function fetchRepos(username: string): Promise<GithubRepo[]> {
   let res: Response;
   try {
     res = await fetch(
-      `https://api.github.com/users/${encodeURIComponent(user)}/repos?sort=updated&per_page=100`,
-      { headers: { Accept: 'application/vnd.github+json' } },
+      `${import.meta.env.VITE_BASE_URL}/github/users/${encodeURIComponent(user)}/repos`,
+      { headers: { Accept: 'application/json' } },
     );
   } catch {
     throw new FetchReposError('NETWORK', '네트워크 오류로 레포 목록을 불러오지 못했어요.');
