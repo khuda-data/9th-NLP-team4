@@ -7,8 +7,9 @@ api_key.txt
 # 실험용으로 따온 외부 repo들
 spike/
 
-# A트랙 파이프라인 실행 산출물
-data_pipeline/output/
+# A트랙 파이프라인 실행 산출물 (trends.json 스냅샷만 커밋해 배포 백엔드가 로드)
+data_pipeline/output/*
+!data_pipeline/output/trends.json
 
 # 의존성
 node_modules/
