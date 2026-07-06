@@ -164,17 +164,23 @@ def run_gate(repo: RepoContext, trend: TrendItem) -> GateResult:
     strong_reasons: list[str] = []
     weak_reasons: list[str] = []
     weak_kinds: set[str] = set()
+    # 강한 근거의 '질'을 점수에 반영하기 위한 세부 신호.
+    tag_matched_deps: set[str] = set()   # 패키지 태그 레벨 정합(가장 확실)
+    title_matched_deps: set[str] = set()  # 트렌드 제목에 등장(트렌드가 그 라이브러리 자체에 관한 것)
 
     # === 강한 근거: 의존성 레벨 ===
     for dependency in sorted(repo_dependencies.intersection(dependency_tags)):
         strong_reasons.append(
             f"저장소 dependency와 트렌드 dependency_tags가 겹칩니다: {dependency}"
         )
+        tag_matched_deps.add(dependency)
     for dependency in sorted(repo_dependencies):
         if _contains_dependency(trend_text, dependency):
             strong_reasons.append(
                 f"저장소 dependency가 트렌드 내용에 등장합니다: {dependency}"
             )
+            if _contains_dependency(trend.title, dependency):
+                title_matched_deps.add(dependency)
 
     # === 약한 근거 1: meta_tags ↔ 트렌드 태그(언어 이름 제외) ===
     tag_overlap = (
@@ -218,7 +224,20 @@ def run_gate(repo: RepoContext, trend: TrendItem) -> GateResult:
     popularity_bonus = min(6, int(math.log10(source_score + 1) * 1.5))
 
     if strong_reasons:
-        score = min(98, 84 + 4 * len(strong_reasons) + 2 * len(weak_kinds))
+        # 강한 대역 안에서도 근거의 질로 차등을 준다. "의존성 1개 + 약한 2종"
+        # 패턴이 모두 같은 점수(92)로 몰리던 문제 방지:
+        #  - 트렌드 제목에 그 라이브러리가 등장(트렌드가 라이브러리 자체 소식) +4
+        #  - 패키지 태그 레벨 정합(dependency_tags 교집합) +4
+        #  - 강한 근거 수(최대 3), 약한 종류 수, 주목도(0~3)로 미세 차등
+        score = min(
+            98,
+            80
+            + (4 if title_matched_deps else 0)
+            + (4 if tag_matched_deps else 0)
+            + 2 * min(len(strong_reasons), 3)
+            + len(weak_kinds)
+            + min(3, popularity_bonus),
+        )
     else:
         # 약한 근거는 종류 수(넓이)와 총 근거 수(깊이)로 44~82 사이에 분산시켜,
         # 같은 '주제만 겹침' 항목들이 모두 같은 점수로 보이지 않게 한다.
